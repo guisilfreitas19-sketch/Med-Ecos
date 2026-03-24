@@ -3,62 +3,103 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ranking Comercial Live</title>
+    <title>Ranking Comercial Medsystem</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 </head>
-<body class="bg-slate-950 text-slate-100 font-sans">
+<body class="bg-[#0a0f1a] text-slate-100 font-sans">
     <div id="root"></div>
 
     <script type="text/babel">
         const { useState, useMemo } = React;
 
         function App() {
+            // Lista atualizada com os 3 vendedores
             const [sellers, setSellers] = useState([
                 { id: 1, name: 'Guilherme', sales: 0, contracts: 0 },
-                { id: 2, name: 'Vanessa', sales: 0, contracts: 0 }
+                { id: 2, name: 'Vanessa', sales: 0, contracts: 0 },
+                { id: 3, name: 'Luiz', sales: 0, contracts: 0 }
             ]);
 
-            const handleIncrement = (id, field, amount) => {
+            const handleUpdate = (id, field, amount) => {
                 setSellers(prev => prev.map(s => 
                     s.id === id ? { ...s, [field]: Math.max(0, s[field] + amount) } : s
                 ));
             };
 
-            const topSales = useMemo(() => [...sellers].sort((a, b) => b.sales - a.sales), [sellers]);
+            // Ordena por valor de vendas para o pódio
+            const sortedSellers = useMemo(() => [...sellers].sort((a, b) => b.sales - a.sales), [sellers]);
 
             return (
-                <div className="max-w-4xl mx-auto p-6 space-y-10">
-                    <header className="flex justify-between items-center bg-slate-900 p-8 rounded-[2rem] border border-slate-800 shadow-2xl">
-                        <div>
-                            <h1 className="text-3xl font-black italic uppercase tracking-tighter">Ranking <span className="text-emerald-500">Comercial</span></h1>
-                            <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Painel de Performance</p>
-                        </div>
+                <div className="max-w-4xl mx-auto p-4 md:p-8 space-y-8">
+                    <header className="bg-[#111827] p-6 rounded-3xl border border-slate-800 shadow-2xl text-center">
+                        <h1 className="text-2xl font-black italic uppercase tracking-tighter text-white">
+                            Ranking <span className="text-emerald-500">Medsystem</span>
+                        </h1>
+                        <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest mt-1">Contratos Aceitos & Vendas</p>
                     </header>
 
-                    <div className="bg-slate-900 p-8 rounded-[2rem] border border-slate-800 h-80 flex items-end justify-center gap-4">
-                        {topSales.map((s, i) => (
-                            <div key={s.id} className="flex flex-col items-center">
-                                <span className="text-[10px] font-bold mb-2">{s.name}</span>
-                                <div className={`w-24 bg-slate-800 rounded-t-xl flex items-center justify-center border-t-2 border-slate-600 ${i === 0 ? 'h-48 bg-emerald-500 border-emerald-300' : 'h-32'}`}>
-                                    <span className="text-xl font-bold">{i + 1}º</span>
-                                </div>
+                    {/* Pódio Visual */}
+                    <div className="bg-[#111827] p-8 rounded-3xl border border-slate-800 h-64 flex items-end justify-center gap-2 md:gap-6">
+                        {/* 2º Lugar */}
+                        <div className="flex flex-col items-center w-24">
+                            <span className="text-[10px] font-bold mb-2 truncate w-full text-center">{sortedSellers[1].name}</span>
+                            <div className="w-full bg-slate-800 h-24 rounded-t-xl flex flex-col items-center justify-center border-t-2 border-slate-600">
+                                <span className="text-lg font-bold text-slate-400">2º</span>
+                                <span className="text-[10px] font-mono">R$ {sortedSellers[1].sales}</span>
                             </div>
-                        ))}
+                        </div>
+
+                        {/* 1º Lugar */}
+                        <div className="flex flex-col items-center w-28">
+                            <span className="text-xs font-black text-yellow-500 mb-2 uppercase">{sortedSellers[0].name}</span>
+                            <div className="w-full bg-emerald-600 h-40 rounded-t-xl flex flex-col items-center justify-center border-t-4 border-emerald-400 shadow-[0_-10px_30px_rgba(16,185,129,0.3)]">
+                                <span className="text-3xl font-black italic text-emerald-950">1º</span>
+                                <span className="text-[11px] font-bold text-emerald-950">R$ {sortedSellers[0].sales}</span>
+                            </div>
+                        </div>
+
+                        {/* 3º Lugar */}
+                        <div className="flex flex-col items-center w-24">
+                            <span className="text-[10px] font-bold mb-2 truncate w-full text-center">{sortedSellers[2].name}</span>
+                            <div className="w-full bg-slate-800/50 h-16 rounded-t-xl flex flex-col items-center justify-center border-t-2 border-slate-700">
+                                <span className="text-lg font-bold text-slate-500">3º</span>
+                                <span className="text-[10px] font-mono opacity-50">R$ {sortedSellers[2].sales}</span>
+                            </div>
+                        </div>
                     </div>
 
-                    <div className="bg-slate-900 p-8 rounded-[2rem] border border-slate-800 shadow-xl space-y-4">
-                        <h2 className="font-bold text-xl mb-6">📝 Gestão de Equipa</h2>
+                    {/* Área de Gestão */}
+                    <div className="grid gap-4">
+                        <h2 className="font-bold text-lg px-2 flex items-center gap-2">📊 Atualizar Performance</h2>
                         {sellers.map(s => (
-                            <div key={s.id} className="flex flex-col md:flex-row items-center gap-4 bg-slate-950 p-4 rounded-2xl border border-slate-800">
-                                <span className="font-bold min-w-[120px] text-emerald-400">{s.name}</span>
-                                <div className="flex flex-1 gap-2 w-full">
-                                    <div className="flex-1 bg-slate-900 rounded-lg p-2 flex justify-between items-center border border-slate-800">
-                                        <button onClick={() => handleIncrement(s.id, 'sales', -100)} className="px-3 py-1 bg-red-900/20 text-red-500 rounded">-</button>
-                                        <span className="text-xs font-mono font-bold">Vendas: {s.sales}</span>
-                                        <button onClick={() => handleIncrement(s.id, 'sales', 100)} className="px-3 py-1 bg-emerald-900/20 text-emerald-500 rounded">+</button>
+                            <div key={s.id} className="bg-[#111827] p-5 rounded-2xl border border-slate-800 flex flex-col md:flex-row items-center gap-6">
+                                <div className="min-w-[100px] text-center md:text-left">
+                                    <p className="text-emerald-400 font-black uppercase text-sm tracking-tight">{s.name}</p>
+                                    <p className="text-[10px] text-slate-500">Vendedor Ativo</p>
+                                </div>
+
+                                <div className="flex flex-1 w-full gap-4">
+                                    {/* Coluna Contratos */}
+                                    <div className="flex-1 bg-black/30 p-3 rounded-xl border border-slate-800 text-center">
+                                        <p className="text-[9px] uppercase font-bold text-slate-500 mb-2">Contratos Aceitos</p>
+                                        <div className="flex items-center justify-between">
+                                            <button onClick={() => handleUpdate(s.id, 'contracts', -1)} className="w-8 h-8 rounded-lg bg-red-900/20 text-red-500 font-bold">-</button>
+                                            <span className="text-xl font-mono font-black">{s.contracts}</span>
+                                            <button onClick={() => handleUpdate(s.id, 'contracts', 1)} className="w-8 h-8 rounded-lg bg-blue-900/20 text-blue-500 font-bold">+</button>
+                                        </div>
+                                    </div>
+
+                                    {/* Coluna Vendas */}
+                                    <div className="flex-1 bg-black/30 p-3 rounded-xl border border-slate-800 text-center">
+                                        <p className="text-[9px] uppercase font-bold text-slate-500 mb-2">Vendas (R$)</p>
+                                        <div className="flex items-center justify-between">
+                                            <button onClick={() => handleUpdate(s.id, 'sales', -100)} className="w-8 h-8 rounded-lg bg-red-900/20 text-red-500 font-bold">-</button>
+                                            <span className="text-sm font-mono font-bold">R$ {s.sales}</span>
+                                            <button onClick={() => handleUpdate(s.id, 'sales', 100)} className="w-8 h-8 rounded-lg bg-emerald-900/20 text-emerald-500 font-bold">+</button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
