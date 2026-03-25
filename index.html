@@ -11,49 +11,56 @@
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #09090b; }
+        body { font-family: 'Inter', sans-serif; }
+        .bg-background { background-color: #09090b; }
         .bg-card { background-color: #18181b; border: 1px solid #27272a; }
         input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-        .progress-transition { transition: width 1.5s cubic-bezier(0.34, 1.56, 0.64, 1); }
     </style>
 </head>
-<body class="text-slate-100 pb-20">
+<body class="bg-background text-slate-100 pb-20">
     <div id="root"></div>
 
     <script type="text/babel">
         const { useState, useMemo, useEffect } = React;
 
-        const TrophyIcon = ({ size = 20 }) => (
-            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+        const TrophyIcon = () => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
         );
 
-        const formatCurrency = (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v);
+        const formatCurrency = (value) => {
+            return new Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: 'BRL',
+            }).format(value);
+        };
 
         function App() {
-            const [sellers, setSellers] = useState(() => {
-                const saved = localStorage.getItem('soitic_v5');
-                return saved ? JSON.parse(saved) : [
-                    { id: 1, name: 'Guilherme', sales: 0, contracts: 0, target: 6000, contractTarget: 10 },
-                    { id: 2, name: 'Vanessa', sales: 0, contracts: 0, target: 6000, contractTarget: 10 },
-                    { id: 3, name: 'Luiz', sales: 0, contracts: 0, target: 3000, contractTarget: 5 },
-                    { id: 4, name: 'João', sales: 0, contracts: 0, target: 3000, contractTarget: 5 }
-                ];
-            });
+            const initialState = JSON.parse(localStorage.getItem('soitic_v4')) || [
+                { id: 1, name: 'Guilherme', sales: 0, contracts: 0, target: 6000 },
+                { id: 2, name: 'Vanessa', sales: 0, contracts: 0, target: 6000 },
+                { id: 3, name: 'Luiz', sales: 0, contracts: 0, target: 3000 },
+                { id: 4, name: 'João', sales: 0, contracts: 0, target: 3000 }
+            ];
 
-            const [lastUpdate, setLastUpdate] = useState(null);
+            const [sellers, setSellers] = useState(initialState);
 
             useEffect(() => {
-                localStorage.setItem('soitic_v5', JSON.stringify(sellers));
+                localStorage.setItem('soitic_v4', JSON.stringify(sellers));
             }, [sellers]);
 
             const handleUpdate = (id, field, value) => {
                 const val = parseFloat(value) || 0;
+                
                 setSellers(prev => prev.map(s => {
                     if (s.id === id) {
                         if (field === 'sales' && val >= s.target && s.sales < s.target) {
-                            confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: ['#fbbf24', '#10b981', '#ffffff'] });
+                            confetti({
+                                particleCount: 150,
+                                spread: 70,
+                                origin: { y: 0.6 },
+                                colors: ['#fbbf24', '#10b981', '#ffffff']
+                            });
                         }
-                        if (s[field] !== val) setLastUpdate({ name: s.name, field });
                         return { ...s, [field]: val };
                     }
                     return s;
@@ -61,7 +68,7 @@
             };
 
             const resetAll = () => {
-                if(confirm("Zerar todos os dados do ranking?")) {
+                if(confirm("Zerar todos os dados do Grupo Soitic?")) {
                     setSellers(sellers.map(s => ({ ...s, sales: 0, contracts: 0 })));
                 }
             };
@@ -69,41 +76,33 @@
             const sortedSales = useMemo(() => [...sellers].sort((a, b) => b.sales - a.sales), [sellers]);
             const sortedContracts = useMemo(() => [...sellers].sort((a, b) => b.contracts - a.contracts), [sellers]);
 
-            const Podium = ({ title, data, field, accentColor, isCurrency }) => (
-                <div className="bg-card rounded-2xl p-6 shadow-xl border-t-4 border-t-white/10 flex flex-col">
+            const Podium = ({ title, data, field, accentColor }) => (
+                <div className="bg-card rounded-2xl p-6 shadow-xl flex flex-col">
                     <div className="flex items-center gap-2 mb-8">
-                        <div className={`p-2 rounded-xl ${accentColor} bg-opacity-20 text-white`}>
-                            <TrophyIcon size={18} />
+                        <div className={`p-2 rounded-xl ${accentColor} bg-opacity-20`}>
+                            <TrophyIcon />
                         </div>
-                        <h3 className="font-bold text-[10px] uppercase tracking-[0.2em] text-slate-400">{title}</h3>
+                        <h3 className="font-bold text-sm uppercase tracking-widest text-slate-400">{title}</h3>
                     </div>
                     
-                    <div className="flex items-end justify-center gap-3 h-32 mt-auto">
-                        {/* 2nd Place */}
+                    <div className="flex items-end justify-center gap-3 h-36 mt-auto">
                         <div className="flex flex-col items-center w-full">
-                            <span className="text-[10px] font-bold text-slate-500 mb-1 truncate w-full text-center">{data[1]?.name}</span>
-                            <div className="w-full bg-[#27272a] h-16 rounded-t-xl flex items-center justify-center border-t border-white/5 shadow-inner">
-                                <span className="text-[9px] font-mono">{isCurrency ? formatCurrency(data[1]?.[field]) : data[1]?.[field]}</span>
+                            <span className="text-[10px] font-bold text-slate-500 mb-1 truncate w-full text-center">{data[1].name}</span>
+                            <div className="w-full bg-[#27272a] h-16 rounded-t-xl flex items-center justify-center border-t border-white/5">
+                                <span className="text-[9px] font-mono font-bold">{formatCurrency(data[1][field])}</span>
                             </div>
                         </div>
-                        {/* 1st Place */}
                         <div className="flex flex-col items-center w-full">
-                            <span className="text-[11px] font-black text-white mb-1 truncate w-full text-center uppercase tracking-tighter">{data[0]?.name}</span>
-                            <div className={`w-full ${accentColor} h-24 rounded-t-xl flex flex-col items-center justify-center shadow-2xl border-t border-white/30 relative overflow-hidden`}>
-                                <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-white/20 to-transparent"></div>
-                                <span className="text-3xl font-black italic relative z-10 text-white">1º</span>
-                                <span className="text-[9px] font-bold px-1 relative z-10 text-white/90">
-                                    {isCurrency ? formatCurrency(data[0]?.[field]) : `${data[0]?.[field]} UN`}
-                                </span>
+                            <span className="text-[11px] font-black text-white mb-1 truncate w-full text-center uppercase tracking-tighter">{data[0].name}</span>
+                            <div className={`w-full ${accentColor} h-28 rounded-t-xl flex flex-col items-center justify-center shadow-2xl border-t border-white/30`}>
+                                <span className="text-3xl font-black italic">1º</span>
+                                <span className="text-[9px] font-bold px-1">{formatCurrency(data[0][field])}</span>
                             </div>
                         </div>
-                        {/* 3rd Place */}
                         <div className="flex flex-col items-center w-full">
-                            <span className="text-[10px] font-bold text-slate-600 mb-1 truncate w-full text-center">{data[2]?.name}</span>
+                            <span className="text-[10px] font-bold text-slate-600 mb-1 truncate w-full text-center">{data[2].name}</span>
                             <div className="w-full bg-[#27272a]/40 h-10 rounded-t-xl flex items-center justify-center border-t border-white/5">
-                                <span className="text-[8px] font-bold opacity-40 italic">
-                                    {isCurrency ? formatCurrency(data[2]?.[field]) : data[2]?.[field]}
-                                </span>
+                                <span className="text-[8px] font-bold opacity-40">{formatCurrency(data[2][field])}</span>
                             </div>
                         </div>
                     </div>
@@ -112,115 +111,51 @@
 
             return (
                 <div className="min-h-screen">
-                    <header className="border-b border-[#27272a] bg-[#09090b]/80 backdrop-blur-md sticky top-0 z-50">
-                        <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
-                            <div className="flex items-center gap-3">
+                    <header className="border-b border-[#27272a] bg-[#09090b] sticky top-0 z-50">
+                        <div className="max-w-5xl mx-auto px-6 py-6 flex items-center justify-between">
+                            <div className="flex items-center gap-4">
                                 <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-yellow-600 flex items-center justify-center shadow-lg text-white">
                                     <TrophyIcon />
                                 </div>
                                 <div>
-                                    <h1 className="text-lg font-black tracking-tighter text-white uppercase italic leading-none">Grupo <span className="text-amber-500 tracking-normal">Soitic</span></h1>
-                                    <p className="text-[9px] text-slate-500 font-bold uppercase tracking-[0.3em] mt-1">Commercial Performance</p>
+                                    <h1 className="text-xl font-black tracking-tighter text-white uppercase italic">Grupo <span className="text-amber-500 tracking-normal">Soitic</span></h1>
+                                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-[0.4em]">Ranking Comercial</p>
                                 </div>
                             </div>
-                            <div className="flex items-center gap-4">
-                                {lastUpdate && (
-                                    <span className="hidden md:block text-[9px] font-bold text-emerald-500 animate-pulse bg-emerald-500/10 px-3 py-1 rounded-full uppercase italic">
-                                        Atualizado: {lastUpdate.name} ({lastUpdate.field})
-                                    </span>
-                                )}
-                                <button onClick={resetAll} className="text-[9px] font-black border border-red-900/30 text-red-500 px-3 py-2 rounded-lg hover:bg-red-500 hover:text-white transition-all uppercase tracking-widest">
-                                    Reset
-                                </button>
-                            </div>
+                            <button onClick={resetAll} className="text-[10px] font-bold border border-red-900/50 text-red-500 px-4 py-2 rounded-lg hover:bg-red-500 hover:text-white transition-all uppercase">
+                                Zerar Dados
+                            </button>
                         </div>
                     </header>
 
-                    <main className="max-w-5xl mx-auto px-6 py-10 space-y-10">
-                        <div className="grid md:grid-cols-2 gap-6">
-                            <Podium title="Top Contratos" data={sortedContracts} field="contracts" accentColor="bg-blue-600" isCurrency={false} />
-                            <Podium title="Top Faturamento" data={sortedSales} field="sales" accentColor="bg-emerald-600" isCurrency={true} />
+                    <div className="max-w-5xl mx-auto px-6 py-10 space-y-10">
+                        <div className="grid md:grid-cols-2 gap-8">
+                            <Podium title="Contratos Aceitos" data={sortedContracts} field="contracts" accentColor="bg-blue-600" />
+                            <Podium title="Total em Vendas" data={sortedSales} field="sales" accentColor="bg-emerald-600" />
                         </div>
 
-                        <section className="bg-card rounded-[2rem] shadow-2xl overflow-hidden border border-[#27272a]">
-                            <div className="p-8 border-b border-[#27272a] flex justify-between items-center bg-white/[0.01]">
-                                <h3 className="font-bold text-xs uppercase tracking-[0.2em] text-slate-400">Painel de Lançamentos</h3>
-                                <span className="text-[10px] font-mono text-slate-500 italic">v5.0 Stable</span>
+                        <div className="bg-card rounded-[2rem] border border-[#27272a] overflow-hidden shadow-2xl">
+                            <div className="p-8 border-b border-[#27272a] bg-white/[0.02]">
+                                <h3 className="font-bold text-sm uppercase tracking-widest text-slate-400">Gestão de Performance</h3>
                             </div>
-                            
-                            <div className="p-4 md:p-8 space-y-4">
+                            <div className="p-8 space-y-6">
                                 {sellers.map(s => {
                                     const progress = Math.min((s.sales / s.target) * 100, 100);
-                                    const cProgress = Math.min((s.contracts / s.contractTarget) * 100, 100);
-                                    
+                                    const remaining = s.target - s.sales;
                                     return (
-                                        <div key={s.id} className="group p-6 rounded-2xl bg-[#0c0c0e] border border-[#27272a] hover:bg-[#111113] hover:border-slate-600 transition-all duration-300">
-                                            <div className="flex flex-col md:flex-row gap-6">
-                                                <div className="w-full md:w-48">
-                                                    <p className="font-black text-xl uppercase text-white leading-none mb-2 group-hover:text-amber-500 transition-colors">{s.name}</p>
-                                                    <div className="space-y-1">
-                                                        <div className="flex flex-col">
-                                                            <span className="text-[8px] font-black text-slate-600 uppercase">Meta Vendas</span>
-                                                            <input 
-                                                                type="number" 
-                                                                className="bg-transparent text-[11px] font-bold text-slate-400 focus:text-white focus:outline-none w-24"
-                                                                value={s.target}
-                                                                onChange={(e) => handleUpdate(s.id, 'target', e.target.value)}
-                                                            />
-                                                        </div>
-                                                    </div>
+                                        <div key={s.id} className="p-6 rounded-2xl bg-[#0c0c0e] border border-[#27272a] hover:border-slate-700 transition-all">
+                                            <div className="flex flex-col md:flex-row justify-between items-center gap-6">
+                                                <div className="w-full md:w-56 text-center md:text-left">
+                                                    <p className="font-black text-lg uppercase text-white leading-none mb-1">{s.name}</p>
+                                                    <p className="text-[10px] text-slate-500 font-bold uppercase italic">Meta: {formatCurrency(s.target)}</p>
                                                 </div>
-
-                                                <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                    <div className="space-y-2">
-                                                        <label className="flex justify-between px-1">
-                                                            <span className="text-[9px] font-black text-emerald-500 uppercase italic">Volume Financeiro</span>
-                                                            <span className="text-[9px] font-mono text-slate-400">{formatCurrency(s.sales)}</span>
-                                                        </label>
-                                                        <div className="relative">
-                                                            <input 
-                                                                type="number" 
-                                                                value={s.sales}
-                                                                onChange={(e) => handleUpdate(s.id, 'sales', e.target.value)}
-                                                                className="w-full bg-[#18181b] border border-[#27272a] rounded-xl p-3 text-sm font-mono text-emerald-400 focus:ring-1 focus:ring-emerald-500 focus:outline-none transition-all"
-                                                            />
-                                                            <div className="mt-2 h-1.5 w-full bg-[#18181b] rounded-full overflow-hidden">
-                                                                <div className={`h-full progress-transition ${progress >= 100 ? 'bg-amber-500' : 'bg-emerald-500'}`} style={{ width: `${progress}%` }}></div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-
-                                                    <div className="space-y-2">
-                                                        <label className="flex justify-between px-1">
-                                                            <span className="text-[9px] font-black text-blue-500 uppercase italic">Contratos Fechados</span>
-                                                            <span className="text-[9px] font-mono text-slate-400">{s.contracts} / {s.contractTarget}</span>
-                                                        </label>
-                                                        <div className="relative">
-                                                            <input 
-                                                                type="number" 
-                                                                value={s.contracts}
-                                                                onChange={(e) => handleUpdate(s.id, 'contracts', e.target.value)}
-                                                                className="w-full bg-[#18181b] border border-[#27272a] rounded-xl p-3 text-sm font-mono text-blue-400 focus:ring-1 focus:ring-blue-500 focus:outline-none transition-all"
-                                                            />
-                                                            <div className="mt-2 h-1.5 w-full bg-[#18181b] rounded-full overflow-hidden">
-                                                                <div className="h-full bg-blue-500 progress-transition" style={{ width: `${cProgress}%` }}></div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        </section>
-                    </main>
-                </div>
-            );
-        }
-
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
-    </script>
-</body>
-</html>
+                                                
+                                                <div className="grid grid-cols-2 gap-4 w-full">
+                                                    <div className="space-y-1.5">
+                                                        <label className="text-[9px] font-black text-emerald-500/60 uppercase ml-2 italic">Vendas</label>
+                                                        <input 
+                                                            type="number" 
+                                                            value={s.sales}
+                                                            onChange={(e) => handleUpdate(s.id, 'sales', e.target.value)}
+                                                            className="bg-[#18181b] border border-[#27272a] rounded-xl p-3 text-sm font-mono text-emerald-400 focus:outline-none focus:border-emerald-500 w-full transition-all"
+                                                        />
