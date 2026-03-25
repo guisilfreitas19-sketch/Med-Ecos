@@ -8,14 +8,26 @@
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .bg-background { background-color: #09090b; }
+        .bg-card { background-color: #18181b; border: 1px solid #27272a; }
+        .text-muted { color: #a1a1aa; }
+        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    </style>
 </head>
-<body class="bg-[#05070a] text-slate-100 font-sans pb-20">
+<body class="bg-background text-slate-100 pb-20">
     <div id="root"></div>
 
     <script type="text/babel">
         const { useState, useMemo, useEffect } = React;
 
-        // Função para formatar números no padrão R$ 0.000,00
+        // Ícones em SVG para não precisar de biblioteca externa
+        const TrophyIcon = () => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+        );
+
         const formatCurrency = (value) => {
             return new Intl.NumberFormat('pt-BR', {
                 style: 'currency',
@@ -24,7 +36,7 @@
         };
 
         function App() {
-            const initialState = JSON.parse(localStorage.getItem('soiticData')) || [
+            const initialState = JSON.parse(localStorage.getItem('soitic_v3')) || [
                 { id: 1, name: 'Guilherme', sales: 0, contracts: 0, target: 6000 },
                 { id: 2, name: 'Vanessa', sales: 0, contracts: 0, target: 6000 },
                 { id: 3, name: 'Luiz', sales: 0, contracts: 0, target: 3000 },
@@ -34,47 +46,53 @@
             const [sellers, setSellers] = useState(initialState);
 
             useEffect(() => {
-                localStorage.setItem('soiticData', JSON.stringify(sellers));
+                localStorage.setItem('soitic_v3', JSON.stringify(sellers));
             }, [sellers]);
 
             const handleUpdate = (id, field, value) => {
-                // Remove caracteres não numéricos para salvar o valor real
                 const val = parseFloat(value) || 0;
-                setSellers(prev => prev.map(s => 
-                    s.id === id ? { ...s, [field]: val } : s
-                ));
+                setSellers(prev => prev.map(s => s.id === id ? { ...s, [field]: val } : s));
             };
 
-            const resetValues = () => {
-                if(confirm("Deseja zerar os valores do ranking?")) {
+            const resetAll = () => {
+                if(confirm("Deseja zerar os dados do ranking?")) {
                     setSellers(sellers.map(s => ({ ...s, sales: 0, contracts: 0 })));
                 }
             };
 
-            const topSales = useMemo(() => [...sellers].sort((a, b) => b.sales - a.sales), [sellers]);
-            const topContracts = useMemo(() => [...sellers].sort((a, b) => b.contracts - a.contracts), [sellers]);
+            const sortedSales = useMemo(() => [...sellers].sort((a, b) => b.sales - a.sales), [sellers]);
+            const sortedContracts = useMemo(() => [...sellers].sort((a, b) => b.contracts - a.contracts), [sellers]);
 
-            const Podium = ({ title, data, field, color, icon }) => (
-                <div className="flex-1 bg-[#0f172a] p-6 rounded-[2.5rem] border border-slate-800 shadow-2xl">
-                    <h2 className="text-center text-[10px] font-black uppercase tracking-[0.3em] mb-6 text-slate-500">{icon} {title}</h2>
-                    <div className="h-44 flex items-end justify-center gap-3">
-                        <div className="w-1/3 flex flex-col items-center">
-                            <span className="text-[10px] font-bold mb-1 truncate w-full text-center opacity-70">{data[1].name}</span>
-                            <div className="w-full bg-slate-800/50 h-20 rounded-t-2xl flex flex-col items-center justify-center border-t border-slate-700">
-                                <span className="text-[9px] font-mono">{formatCurrency(data[1][field])}</span>
+            const Podium = ({ title, data, field, accentColor }) => (
+                <div className="bg-card rounded-xl p-6 shadow-sm overflow-hidden flex flex-col">
+                    <div className="flex items-center gap-2 mb-8">
+                        <div className={`p-1.5 rounded-lg ${accentColor} bg-opacity-20`}>
+                            <TrophyIcon />
+                        </div>
+                        <h3 className="font-semibold text-sm tracking-tight">{title}</h3>
+                    </div>
+                    
+                    <div className="flex items-end justify-center gap-2 h-32 mt-auto">
+                        {/* 2º lugar */}
+                        <div className="flex flex-col items-center w-full max-w-[80px]">
+                            <span className="text-[10px] font-medium text-muted mb-1 truncate w-full text-center">{data[1].name}</span>
+                            <div className="w-full bg-[#27272a] h-16 rounded-t-md flex flex-col items-center justify-center border-t border-white/5">
+                                <span className="text-[9px] font-bold">{formatCurrency(data[1][field])}</span>
                             </div>
                         </div>
-                        <div className="w-1/3 flex flex-col items-center">
-                            <span className="text-[11px] font-black text-emerald-400 mb-1 truncate w-full text-center uppercase tracking-tighter">{data[0].name}</span>
-                            <div className={`w-full ${color} h-32 rounded-t-2xl flex flex-col items-center justify-center shadow-[0_0_30px_rgba(16,185,129,0.2)] border-t-2 border-white/20`}>
-                                <span className="text-3xl font-black italic text-white">1º</span>
-                                <span className="text-[9px] font-bold text-center leading-none text-white px-1">{formatCurrency(data[0][field])}</span>
+                        {/* 1º lugar */}
+                        <div className="flex flex-col items-center w-full max-w-[100px]">
+                            <span className="text-[11px] font-bold text-white mb-1 truncate w-full text-center">{data[0].name}</span>
+                            <div className={`w-full ${accentColor} h-24 rounded-t-md flex flex-col items-center justify-center shadow-lg border-t border-white/20`}>
+                                <span className="text-2xl font-black italic">1º</span>
+                                <span className="text-[10px] font-bold">{formatCurrency(data[0][field])}</span>
                             </div>
                         </div>
-                        <div className="w-1/3 flex flex-col items-center">
-                            <span className="text-[10px] font-bold mb-1 truncate w-full text-center opacity-40">{data[2].name}</span>
-                            <div className="w-full bg-slate-800/20 h-12 rounded-t-2xl flex items-center justify-center border-t border-slate-800">
-                                <span className="text-[8px] opacity-40 font-bold">{formatCurrency(data[2][field])}</span>
+                        {/* 3º lugar */}
+                        <div className="flex flex-col items-center w-full max-w-[80px]">
+                            <span className="text-[10px] font-medium text-muted mb-1 truncate w-full text-center opacity-50">{data[2].name}</span>
+                            <div className="w-full bg-[#27272a]/40 h-10 rounded-t-md flex items-center justify-center border-t border-white/5">
+                                <span className="text-[8px] opacity-40">{formatCurrency(data[2][field])}</span>
                             </div>
                         </div>
                     </div>
@@ -82,73 +100,89 @@
             );
 
             return (
-                <div className="max-w-6xl mx-auto p-4 md:p-8 space-y-8">
-                    <header className="text-center py-12 bg-gradient-to-b from-slate-900 to-transparent rounded-[3rem] border-b border-slate-800">
-                        <h1 className="text-4xl font-black italic uppercase tracking-tighter text-white">
-                            GRUPO <span className="text-emerald-500 text-5xl tracking-normal">SOITIC</span>
-                        </h1>
-                        <p className="text-slate-500 text-[11px] font-bold uppercase tracking-[0.6em] mt-2">Ranking Comercial Especializado</p>
-                    </header>
-
-                    <div className="flex flex-col lg:flex-row gap-8">
-                        <Podium title="Volume de Vendas" data={topSales} field="sales" color="bg-emerald-600" icon="💰" />
-                        <Podium title="Contratos Aceitos" data={topContracts} field="contracts" color="bg-blue-600" icon="📄" />
+                <div className="min-h-screen">
+                    {/* Header Estilo Dashboard */}
+                    <div className="border-b border-[#27272a] bg-[#09090b]">
+                        <div className="max-w-5xl mx-auto px-6 py-8 flex flex-col sm:flex-row items-center justify-between gap-6">
+                            <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-400 to-yellow-600 flex items-center justify-center shadow-lg shadow-amber-500/10 text-white">
+                                    <TrophyIcon />
+                                </div>
+                                <div className="text-center sm:text-left">
+                                    <h1 className="text-2xl font-extrabold tracking-tight text-white uppercase italic">Grupo <span className="text-amber-500">Soitic</span></h1>
+                                    <p className="text-sm text-muted font-medium">Ranking Comercial</p>
+                                </div>
+                            </div>
+                            <button onClick={resetAll} className="text-xs font-semibold bg-white text-black px-4 py-2 rounded-lg hover:bg-slate-200 transition-colors uppercase tracking-wider">
+                                Zerar Painel
+                            </button>
+                        </div>
                     </div>
 
-                    <div className="bg-[#0f172a] p-8 rounded-[3rem] border border-slate-800 shadow-2xl space-y-8">
-                        <div className="flex justify-between items-center border-b border-slate-800 pb-4">
-                            <h2 className="font-black text-xs uppercase tracking-widest text-slate-400 italic">Painel de Lançamento</h2>
-                            <button onClick={resetValues} className="text-[9px] font-black bg-red-500/10 text-red-500 px-4 py-2 rounded-full border border-red-500/20 hover:bg-red-500 hover:text-white transition-all">ZERAR DIA</button>
+                    <div className="max-w-5xl mx-auto px-6 py-10 space-y-8">
+                        {/* Pódios Lado a Lado */}
+                        <div className="grid md:grid-cols-2 gap-6">
+                            <Podium title="Contratos Aceitos" data={sortedContracts} field="contracts" accentColor="bg-blue-600" />
+                            <Podium title="Volume de Vendas (R$)" data={sortedSales} field="sales" accentColor="bg-emerald-600" />
                         </div>
 
-                        <div className="grid gap-6">
-                            {sellers.map(s => {
-                                const progress = Math.min((s.sales / s.target) * 100, 100);
-                                return (
-                                    <div key={s.id} className="bg-black/40 p-6 rounded-[2rem] border border-slate-800/50 hover:border-emerald-500/30 transition-all group">
-                                        <div className="flex flex-col md:flex-row justify-between items-center gap-6">
-                                            <div className="w-full md:w-48 text-center md:text-left">
-                                                <span className="font-black text-xl text-white uppercase block leading-none group-hover:text-emerald-400 transition-colors">{s.name}</span>
-                                                <span className="text-[10px] text-slate-500 font-bold italic uppercase tracking-wider">Meta: {formatCurrency(s.target)}</span>
-                                            </div>
-                                            <div className="grid grid-cols-2 gap-4 w-full">
-                                                <div className="space-y-1">
-                                                    <label className="text-[9px] font-black text-emerald-500/50 uppercase ml-2 italic">Vendas</label>
-                                                    <input 
-                                                        type="number" 
-                                                        value={s.sales}
-                                                        onChange={(e) => handleUpdate(s.id, 'sales', e.target.value)}
-                                                        className="bg-slate-900/50 border border-slate-800 rounded-2xl p-3 text-sm font-mono text-emerald-400 focus:outline-none focus:border-emerald-500 w-full"
-                                                        placeholder="0,00"
-                                                    />
+                        {/* Ranking Completo / Edição */}
+                        <div className="bg-card rounded-xl border border-[#27272a] overflow-hidden">
+                            <div className="p-6 border-b border-[#27272a]">
+                                <h3 className="font-semibold text-base flex items-center gap-2">
+                                    <span className="text-muted">📊</span> Ranking Completo e Gestão
+                                </h3>
+                            </div>
+                            <div className="p-6 space-y-4">
+                                {sellers.map(s => {
+                                    const progress = Math.min((s.sales / s.target) * 100, 100);
+                                    return (
+                                        <div key={s.id} className="p-4 rounded-xl bg-[#09090b] border border-[#27272a] flex flex-col gap-4">
+                                            <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+                                                <div className="w-full md:w-40">
+                                                    <p className="font-bold text-sm uppercase">{s.name}</p>
+                                                    <p className="text-[10px] text-muted font-semibold">Meta: {formatCurrency(s.target)}</p>
                                                 </div>
-                                                <div className="space-y-1">
-                                                    <label className="text-[9px] font-black text-blue-500/50 uppercase ml-2 italic">Contratos</label>
-                                                    <input 
-                                                        type="number" 
-                                                        value={s.contracts}
-                                                        onChange={(e) => handleUpdate(s.id, 'contracts', e.target.value)}
-                                                        className="bg-slate-900/50 border border-slate-800 rounded-2xl p-3 text-sm font-mono text-blue-400 focus:outline-none focus:border-blue-500 w-full"
-                                                        placeholder="0,00"
-                                                    />
+                                                
+                                                <div className="grid grid-cols-2 gap-3 w-full max-w-md">
+                                                    <div className="flex flex-col gap-1">
+                                                        <span className="text-[9px] font-bold text-muted uppercase ml-1">Vendas</span>
+                                                        <input 
+                                                            type="number" 
+                                                            value={s.sales}
+                                                            onChange={(e) => handleUpdate(s.id, 'sales', e.target.value)}
+                                                            className="bg-[#18181b] border border-[#27272a] rounded-lg p-2 text-xs font-mono text-emerald-400 focus:outline-none focus:border-emerald-500 transition-all"
+                                                        />
+                                                    </div>
+                                                    <div className="flex flex-col gap-1">
+                                                        <span className="text-[9px] font-bold text-muted uppercase ml-1">Contratos</span>
+                                                        <input 
+                                                            type="number" 
+                                                            value={s.contracts}
+                                                            onChange={(e) => handleUpdate(s.id, 'contracts', e.target.value)}
+                                                            className="bg-[#18181b] border border-[#27272a] rounded-lg p-2 text-xs font-mono text-blue-400 focus:outline-none focus:border-blue-500 transition-all"
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            {/* Barra de Progresso Estilizada */}
+                                            <div className="space-y-1.5">
+                                                <div className="flex justify-between text-[10px] font-bold uppercase tracking-tighter">
+                                                    <span className="text-muted">Atingimento</span>
+                                                    <span className={progress >= 100 ? 'text-amber-500' : 'text-emerald-500'}>{Math.round(progress)}%</span>
+                                                </div>
+                                                <div className="h-2 w-full bg-[#18181b] rounded-full overflow-hidden">
+                                                    <div 
+                                                        className={`h-full transition-all duration-700 rounded-full ${progress >= 100 ? 'bg-amber-500' : 'bg-emerald-500'}`}
+                                                        style={{ width: `${progress}%` }}
+                                                    ></div>
                                                 </div>
                                             </div>
                                         </div>
-                                        <div className="mt-6 space-y-2">
-                                            <div className="flex justify-between text-[10px] font-black uppercase text-slate-500 italic px-1">
-                                                <span>Atingimento da Meta</span>
-                                                <span className={progress >= 100 ? 'text-yellow-500' : 'text-emerald-500'}>{Math.round(progress)}%</span>
-                                            </div>
-                                            <div className="h-2.5 w-full bg-slate-900 rounded-full overflow-hidden border border-slate-800 p-[2px]">
-                                                <div 
-                                                    className={`h-full rounded-full transition-all duration-1000 ${progress >= 100 ? 'bg-gradient-to-r from-yellow-600 to-yellow-400 shadow-[0_0_15px_rgba(234,179,8,0.4)]' : 'bg-gradient-to-r from-emerald-600 to-emerald-400'}`}
-                                                    style={{ width: `${progress}%` }}
-                                                ></div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                );
-                            })}
+                                    );
+                                })}
+                            </div>
                         </div>
                     </div>
                 </div>
