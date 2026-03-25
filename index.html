@@ -3,11 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Med/Ecos Pro</title>
+    <title>Dashboard Med/Ecos Final</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         .tab-active { border-bottom: 4px solid #4f46e5; color: #4f46e5; font-weight: bold; }
-        input::placeholder { color: #cbd5e1; font-weight: normal; }
     </style>
 </head>
 <body class="bg-gray-100 min-h-screen">
@@ -21,25 +20,25 @@
 
     <div class="max-w-md mx-auto p-4 space-y-6">
         
-        <div class="bg-white p-6 rounded-2xl shadow-sm space-y-4">
+        <div class="bg-white p-6 rounded-2xl shadow-sm space-y-4 text-center">
             <h2 class="text-xs font-black text-gray-400 uppercase tracking-wider">Entrada de Dados - <span id="label-empresa">MEDSYSTEM</span></h2>
             
             <div class="grid grid-cols-2 gap-3">
                 <div class="col-span-2">
                     <label class="block text-xs font-bold text-gray-500 uppercase">Faturamento Mês Atual</label>
-                    <input type="text" id="atual" oninput="aplicarMascara(this, 'atual')" class="w-full mt-1 p-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:border-indigo-500 outline-none text-lg font-bold" placeholder="R$ 0,00">
+                    <input type="text" id="atual" oninput="mascara(this, 'atual')" class="w-full mt-1 p-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:border-indigo-500 outline-none text-lg font-bold text-center" placeholder="R$ 0,00">
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-gray-500 uppercase">Mesmo Mês 2025</label>
-                    <input type="text" id="ref2025" oninput="aplicarMascara(this, 'ref2025')" class="w-full mt-1 p-2 bg-gray-50 border rounded-lg outline-none focus:border-indigo-400" placeholder="R$ 0,00">
+                    <label class="block text-xs font-bold text-gray-500 uppercase text-center">Mês 2025</label>
+                    <input type="text" id="ref2025" oninput="mascara(this, 'ref2025')" class="w-full mt-1 p-2 bg-gray-50 border rounded-lg text-center" placeholder="R$ 0,00">
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-gray-500 uppercase">Pior Mês 2026</label>
-                    <input type="text" id="pior2026" oninput="aplicarMascara(this, 'pior2026')" class="w-full mt-1 p-2 bg-gray-50 border rounded-lg outline-none focus:border-indigo-400" placeholder="R$ 0,00">
+                    <label class="block text-xs font-bold text-gray-500 uppercase text-center">Pior 2026</label>
+                    <input type="text" id="pior2026" oninput="mascara(this, 'pior2026')" class="w-full mt-1 p-2 bg-gray-50 border rounded-lg text-center" placeholder="R$ 0,00">
                 </div>
                 <div class="col-span-2">
                     <label class="block text-xs font-bold text-gray-500 uppercase">Melhor Mês 2026 (Recorde)</label>
-                    <input type="text" id="melhor2026" oninput="aplicarMascara(this, 'melhor2026')" class="w-full mt-1 p-2 bg-gray-50 border rounded-lg outline-none focus:border-indigo-400" placeholder="R$ 0,00">
+                    <input type="text" id="melhor2026" oninput="mascara(this, 'melhor2026')" class="w-full mt-1 p-2 bg-gray-50 border rounded-lg text-center" placeholder="R$ 0,00">
                 </div>
             </div>
         </div>
@@ -47,7 +46,7 @@
         <div class="space-y-3 text-center">
             <div id="card2025" class="bg-white p-4 rounded-xl border-l-4 border-gray-200 shadow-sm transition-all">
                 <p class="text-[10px] font-black text-gray-400 uppercase leading-none mb-1">Comparativo Anual (2025)</p>
-                <p id="txt2025" class="text-lg font-bold text-gray-300 italic">Insira os valores</p>
+                <p id="txt2025" class="text-lg font-bold text-gray-300">Insira os valores</p>
             </div>
 
             <div id="cardPior" class="bg-white p-4 rounded-xl border-l-4 border-gray-200 shadow-sm transition-all">
@@ -55,6 +54,58 @@
                 <p id="txtPior" class="text-lg font-bold text-gray-300 italic">Aguardando...</p>
             </div>
 
-            <div class="bg-slate-900 p-5 rounded-2xl text-white shadow-lg relative overflow-hidden">
+            <div class="bg-slate-900 p-5 rounded-2xl text-white shadow-lg">
                 <p class="text-[10px] font-black text-indigo-300 uppercase">Meta de Recorde</p>
-                <h2 id="txtMelhor" class="text-2xl font-black mt-1 text-yellow-4
+                <h2 id="txtMelhor" class="text-2xl font-black mt-1 text-yellow-400 italic">---</h2>
+                <div class="w-full bg-slate-700 rounded-full h-3 mt-4 overflow-hidden">
+                    <div id="barraProgresso" class="bg-yellow-400 h-full w-0 transition-all duration-700"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let abaAtual = 'med';
+        let dados = JSON.parse(localStorage.getItem('dash_v3')) || {
+            med: { atual: 0, ref2025: 0, pior2026: 0, melhor2026: 0 },
+            ecos: { atual: 0, ref2025: 0, pior2026: 0, melhor2026: 0 }
+        };
+
+        function formatarMoeda(valor) {
+            return valor.toLocaleString('pt-br', { style: 'currency', currency: 'BRL' });
+        }
+
+        function mascara(i, campo) {
+            let v = i.value.replace(/\D/g,'');
+            v = (v/100).toFixed(2) + '';
+            v = v.replace(".", ",");
+            v = v.replace(/(\d)(\d{3})(\d{3}),/g, "$1.$2.$3,");
+            v = v.replace(/(\d)(\d{3}),/g, "$1.$2,");
+            i.value = v !== '0,00' ? 'R$ ' + v : '';
+            
+            // Salva o valor numérico REAL para o cálculo
+            dados[abaAtual][campo] = parseFloat(v.replace(/\./g, '').replace(',', '.'));
+            localStorage.setItem('dash_v3', JSON.stringify(dados));
+            calcular();
+        }
+
+        function mudarAba(aba) {
+            abaAtual = aba;
+            document.getElementById('btn-med').className = `flex-1 py-4 text-center font-bold uppercase ${aba === 'med' ? 'tab-active' : 'text-gray-400'}`;
+            document.getElementById('btn-ecos').className = `flex-1 py-4 text-center font-bold uppercase ${aba === 'ecos' ? 'tab-active' : 'text-gray-400'}`;
+            document.getElementById('label-empresa').innerText = aba.toUpperCase();
+            
+            // Preencher inputs com os valores salvos formatados
+            ['atual', 'ref2025', 'pior2026', 'melhor2026'].forEach(id => {
+                const val = dados[abaAtual][id];
+                document.getElementById(id).value = val > 0 ? formatarMoeda(val) : '';
+            });
+            
+            calcular();
+        }
+
+        function calcular() {
+            const a = dados[abaAtual].atual || 0;
+            const r = dados[abaAtual].ref2025 || 0;
+            const p = dados[abaAtual].pior2026 || 0;
+            const m = dados[abaAtual].melhor2026 || 0;
