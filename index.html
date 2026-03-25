@@ -1,254 +1,222 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ranking Comercial - Grupo Soitic</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Inter', sans-serif; }
-        .bg-background { background-color: #09090b; }
-        .bg-card { background-color: #18181b; border: 1px solid #27272a; }
-        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-        .bar-transition { transition: width 1s cubic-bezier(0.4, 0, 0.2, 1); }
-        .input-currency-container { position: relative; display: flex; align-items: center; }
-        .currency-symbol { position: absolute; left: 12px; font-weight: 800; font-size: 0.7rem; opacity: 0.5; pointer-events: none; }
-        .leader-glow { animation: leader-glow 2s infinite; }
-        @keyframes leader-glow { 0%, 100% { box-shadow: 0 0 10px rgba(16, 185, 129, 0.1); } 50% { box-shadow: 0 0 20px rgba(16, 185, 129, 0.4); } }
-    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ranking Comercial - Grupo Soitic</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .bg-background { background-color: #09090b; }
+        .bg-card { background-color: #18181b; border: 1px solid #27272a; }
+        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        .bar-transition { transition: width 1s cubic-bezier(0.4, 0, 0.2, 1); }
+        .input-currency-container { position: relative; display: flex; align-items: center; }
+        .currency-symbol { position: absolute; left: 12px; font-weight: 800; font-size: 0.7rem; opacity: 0.5; pointer-events: none; }
+    </style>
 </head>
 <body class="bg-background text-slate-100 pb-20">
-    <div id="root"></div>
+    <div id="root"></div>
 
-    <script type="text/babel">
-        const { useState, useMemo, useEffect } = React;
+    <script type="text/babel">
+        const { useState, useMemo, useEffect } = React;
 
-        const TrophyIcon = () => (
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
-        );
+        const TrophyIcon = () => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+        );
 
-        const formatCurrency = (value) => {
-            return new Intl.NumberFormat('pt-BR', {
-                style: 'currency',
-                currency: 'BRL',
-            }).format(value);
-        };
+        const formatCurrency = (value) => {
+            return new Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: 'BRL',
+            }).format(value);
+        };
 
-        // Função para gerar avatar com iniciais
-        const getAvatarUrl = (name) => {
-            const initials = name.substring(0, 1).toUpperCase();
-            return `https://ui-avatars.com/api/?name=${initials}&background=333&color=fff&rounded=true&bold=true`;
-        };
+        function App() {
+            const initialState = JSON.parse(localStorage.getItem('soitic_manual_final')) || [
+                { id: 1, name: 'Guilherme', sales: 0, contracts: 0, target: 6000 },
+                { id: 2, name: 'Vanessa', sales: 0, contracts: 0, target: 6000 },
+                { id: 3, name: 'Luiz', sales: 0, contracts: 0, target: 3000 },
+                { id: 4, name: 'João', sales: 0, contracts: 0, target: 3000 }
+            ];
 
-        function App() {
-            const initialState = JSON.parse(localStorage.getItem('soitic_manual_final')) || [
-                { id: 1, name: 'Guilherme', sales: 0, contracts: 0, target: 6000 },
-                { id: 2, name: 'Vanessa', sales: 0, contracts: 0, target: 6000 },
-                { id: 3, name: 'Luiz', sales: 0, contracts: 0, target: 3000 },
-                { id: 4, name: 'João', sales: 0, contracts: 0, target: 3000 }
-            ];
+            const [sellers, setSellers] = useState(initialState);
 
-            const [sellers, setSellers] = useState(initialState);
+            useEffect(() => {
+                localStorage.setItem('soitic_manual_final', JSON.stringify(sellers));
+            }, [sellers]);
 
-            useEffect(() => {
-                localStorage.setItem('soitic_manual_final', JSON.stringify(sellers));
-            }, [sellers]);
+            const handleUpdate = (id, field, value) => {
+                const val = parseFloat(value) || 0;
+                setSellers(prev => prev.map(s => {
+                    if (s.id === id) {
+                        if (field === 'sales' && val >= s.target && s.sales < s.target) {
+                            confetti({
+                                particleCount: 150,
+                                spread: 70,
+                                origin: { y: 0.6 },
+                                colors: ['#fbbf24', '#10b981', '#ffffff']
+                            });
+                        }
+                        return { ...s, [field]: val };
+                    }
+                    return s;
+                }));
+            };
 
-            const handleUpdate = (id, field, value) => {
-                const val = parseFloat(value) || 0;
-                setSellers(prev => prev.map(s => {
-                    if (s.id === id) {
-                        if (field === 'sales' && val >= s.target && s.sales < s.target) {
-                            confetti({
-                                particleCount: 150,
-                                spread: 70,
-                                origin: { y: 0.6 },
-                                colors: ['#fbbf24', '#10b981', '#ffffff']
-                            });
-                        }
-                        return { ...s, [field]: val };
-                    }
-                    return s;
-                }));
-            };
+            const resetAll = () => {
+                if(confirm("Zerar todos os dados do Grupo Soitic?")) {
+                    setSellers(sellers.map(s => ({ ...s, sales: 0, contracts: 0 })));
+                }
+            };
 
-            const resetAll = () => {
-                if(confirm("Zerar todos os dados do Grupo Soitic?")) {
-                    setSellers(sellers.map(s => ({ ...s, sales: 0, contracts: 0 })));
-                }
-            };
+            const sortedSales = useMemo(() => [...sellers].sort((a, b) => b.sales - a.sales), [sellers]);
+            const sortedContracts = useMemo(() => [...sellers].sort((a, b) => b.contracts - a.contracts), [sellers]);
 
-            const sortedSales = useMemo(() => [...sellers].sort((a, b) => b.sales - a.sales), [sellers]);
-            const sortedContracts = useMemo(() => [...sellers].sort((a, b) => b.contracts - a.contracts), [sellers]);
+            const Podium = ({ title, data, field, accentColor }) => (
+                <div className="bg-card rounded-2xl p-6 shadow-xl flex flex-col border border-[#27272a]">
+                    <div className="flex items-center gap-2 mb-8">
+                        <div className={`p-2 rounded-xl ${accentColor} bg-opacity-20`}>
+                            <TrophyIcon />
+                        </div>
+                        <h3 className="font-bold text-sm uppercase tracking-widest text-slate-400">{title}</h3>
+                    </div>
+                    
+                    <div className="flex items-end justify-center gap-3 h-36 mt-auto">
+                        <div className="flex flex-col items-center w-full">
+                            <span className="text-[10px] font-bold text-slate-500 mb-1 truncate w-full text-center">{data[1].name}</span>
+                            <div className="w-full bg-[#27272a] h-16 rounded-t-xl flex items-center justify-center border-t border-white/5">
+                                <span className="text-[9px] font-mono font-bold text-slate-300 px-1 text-center">
+                                    {formatCurrency(data[1][field])}
+                                </span>
+                            </div>
+                        </div>
+                        <div className="flex flex-col items-center w-full">
+                            <span className="text-[11px] font-black text-white mb-1 truncate w-full text-center uppercase tracking-tighter italic">{data[0].name}</span>
+                            <div className={`w-full ${accentColor} h-28 rounded-t-xl flex flex-col items-center justify-center shadow-2xl border-t border-white/30`}>
+                                <span className="text-3xl font-black italic text-white">1º</span>
+                                <span className="text-[9px] font-bold text-white px-1 text-center">
+                                    {formatCurrency(data[0][field])}
+                                </span>
+                            </div>
+                        </div>
+                        <div className="flex flex-col items-center w-full">
+                            <span className="text-[10px] font-bold text-slate-600 mb-1 truncate w-full text-center">{data[2].name}</span>
+                            <div className="w-full bg-[#27272a]/40 h-10 rounded-t-xl flex items-center justify-center border-t border-white/5">
+                                <span className="text-[8px] font-bold opacity-30 px-1 text-center">
+                                    {formatCurrency(data[2][field])}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
 
-            const Podium = ({ title, data, field, accentColor }) => (
-                <div className="bg-card rounded-2xl p-6 shadow-xl flex flex-col border border-[#27272a]">
-                    <div className="flex items-center gap-2 mb-8">
-                        <div className={`p-2 rounded-xl ${accentColor} bg-opacity-20`}>
-                            <TrophyIcon />
-                        </div>
-                        <h3 className="font-bold text-sm uppercase tracking-widest text-slate-400">{title}</h3>
-                    </div>
-                    
-                    <div className="flex items-end justify-center gap-2 h-36 mt-auto">
-                        {/* 2º Lugar */}
-                        <div className="flex flex-col items-center w-full">
-                            <img src={getAvatarUrl(data[1].name)} alt={data[1].name} className="w-8 h-8 rounded-full mb-1" />
-                            <span className="text-[10px] font-bold text-slate-500 mb-1 truncate w-full text-center">{data[1].name}</span>
-                            <div className="w-full bg-[#27272a] h-16 rounded-t-xl flex items-center justify-center border-t border-white/5">
-                                <span className="text-[9px] font-mono font-bold text-slate-300 px-1 text-center">
-                                    {formatCurrency(data[1][field])}
-                                </span>
-                            </div>
-                        </div>
-                        {/* 1º Lugar */}
-                        <div className="flex flex-col items-center w-full relative">
-                            <span className="text-xl absolute -top-3">👑</span>
-                            <img src={getAvatarUrl(data[0].name)} alt={data[0].name} className="w-12 h-12 rounded-full mb-1 border-2 border-amber-500 shadow-xl" />
-                            <span className="text-[11px] font-black text-white mb-1 truncate w-full text-center uppercase tracking-tighter italic">{data[0].name}</span>
-                            <div className={`w-full ${accentColor} h-28 rounded-t-xl flex flex-col items-center justify-center shadow-2xl border-t border-white/30`}>
-                                <span className="text-3xl font-black italic text-white drop-shadow-lg">1º</span>
-                                <span className="text-[9px] font-bold text-white px-1 text-center">
-                                    {formatCurrency(data[0][field])}
-                                </span>
-                            </div>
-                        </div>
-                        {/* 3º Lugar */}
-                        <div className="flex flex-col items-center w-full opacity-60">
-                            <img src={getAvatarUrl(data[2].name)} alt={data[2].name} className="w-7 h-7 rounded-full mb-1 opacity-60" />
-                            <span className="text-[10px] font-bold text-slate-600 mb-1 truncate w-full text-center">{data[2].name}</span>
-                            <div className="w-full bg-[#27272a]/40 h-10 rounded-t-xl flex items-center justify-center border-t border-white/5 relative">
-                                <span className="text-[8px] font-bold opacity-30 px-1 text-center">
-                                    {formatCurrency(data[2][field])}
-                                </span>
-                                <div className="absolute -bottom-2 bg-slate-900 px-3 py-0.5 rounded-full text-[9px] font-black text-slate-600">3º</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            );
+            return (
+                <div className="min-h-screen">
+                    <header className="border-b border-[#27272a] bg-[#09090b] sticky top-0 z-50">
+                        <div className="max-w-5xl mx-auto px-6 py-6 flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-yellow-600 flex items-center justify-center shadow-lg text-white">
+                                    <TrophyIcon />
+                                </div>
+                                <div>
+                                    <h1 className="text-xl font-black tracking-tighter text-white uppercase italic">Grupo <span className="text-amber-500 tracking-normal">Soitic</span></h1>
+                                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-[0.4em]">Ranking Comercial</p>
+                                </div>
+                            </div>
+                            <button onClick={resetAll} className="text-[10px] font-bold border border-red-900/50 text-red-500 px-4 py-2 rounded-lg hover:bg-red-500 hover:text-white transition-all uppercase">
+                                Zerar Dados
+                            </button>
+                        </div>
+                    </header>
 
-            return (
-                <div className="min-h-screen">
-                    <header className="border-b border-[#27272a] bg-[#09090b] sticky top-0 z-50">
-                        <div className="max-w-5xl mx-auto px-6 py-6 flex items-center justify-between">
-                            <div className="flex items-center gap-4">
-                                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-yellow-600 flex items-center justify-center shadow-lg text-white">
-                                    <TrophyIcon />
-                                </div>
-                                <div>
-                                    <h1 className="text-xl font-black tracking-tighter text-white uppercase italic">Grupo <span className="text-amber-500 tracking-normal">Soitic</span></h1>
-                                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-[0.4em]">Ranking Comercial</p>
-                                </div>
-                            </div>
-                            <button onClick={resetAll} className="text-[10px] font-bold border border-red-900/50 text-red-500 px-4 py-2 rounded-lg hover:bg-red-500 hover:text-white transition-all uppercase tracking-widest">
-                                Zerar Dados
-                            </button>
-                        </div>
-                    </header>
+                    <div className="max-w-5xl mx-auto px-6 py-10 space-y-10">
+                        <div className="grid md:grid-cols-2 gap-8">
+                            <Podium title="Contratos Aceitos" data={sortedContracts} field="contracts" accentColor="bg-blue-600" />
+                            <Podium title="Total em Vendas" data={sortedSales} field="sales" accentColor="bg-emerald-600" />
+                        </div>
 
-                    <div className="max-w-5xl mx-auto px-6 py-10 space-y-10">
-                        <div className="grid md:grid-cols-2 gap-8">
-                            <Podium title="Volume em Contratos" data={sortedContracts} field="contracts" accentColor="bg-blue-600" />
-                            <Podium title="Total em Vendas" data={sortedSales} field="sales" accentColor="bg-emerald-600" />
-                        </div>
+                        <div className="bg-card rounded-[2rem] border border-[#27272a] overflow-hidden shadow-2xl">
+                            <div className="p-8 border-b border-[#27272a] bg-white/[0.02]">
+                                <h3 className="font-bold text-sm uppercase tracking-widest text-slate-400">Gestão de Performance</h3>
+                            </div>
+                            <div className="p-8 space-y-6">
+                                {sellers.map(s => {
+                                    const progress = Math.min((s.sales / s.target) * 100, 100);
+                                    const remaining = s.target - s.sales;
+                                    return (
+                                        <div key={s.id} className="p-6 rounded-2xl bg-[#0c0c0e] border border-[#27272a] hover:border-slate-700 transition-all">
+                                            <div className="flex flex-col md:flex-row justify-between items-center gap-6">
+                                                <div className="w-full md:w-56 text-center md:text-left">
+                                                    <p className="font-black text-lg uppercase text-white leading-none mb-1">{s.name}</p>
+                                                    <p className="text-[10px] text-slate-500 font-bold uppercase italic text-emerald-500/50 tracking-wider">Meta: {formatCurrency(s.target)}</p>
+                                                </div>
+                                                
+                                                <div className="grid grid-cols-2 gap-4 w-full">
+                                                    <div className="space-y-1.5">
+                                                        <label className="text-[9px] font-black text-emerald-500/60 uppercase ml-2 italic">Vendas</label>
+                                                        <div className="input-currency-container">
+                                                            <span className="currency-symbol text-emerald-500">R$</span>
+                                                            <input 
+                                                                type="number" 
+                                                                value={s.sales}
+                                                                placeholder="0,00"
+                                                                onChange={(e) => handleUpdate(s.id, 'sales', e.target.value)}
+                                                                className="bg-[#18181b] border border-[#27272a] rounded-xl p-3 pl-9 text-sm font-mono text-emerald-400 focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 w-full transition-all text-right"
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                    <div className="space-y-1.5">
+                                                        <label className="text-[9px] font-black text-blue-500/60 uppercase ml-2 italic">Contratos</label>
+                                                        <div className="input-currency-container">
+                                                            <span className="currency-symbol text-blue-500">R$</span>
+                                                            <input 
+                                                                type="number" 
+                                                                value={s.contracts}
+                                                                placeholder="0,00"
+                                                                onChange={(e) => handleUpdate(s.id, 'contracts', e.target.value)}
+                                                                className="bg-[#18181b] border border-[#27272a] rounded-xl p-3 pl-9 text-sm font-mono text-blue-400 focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/20 w-full transition-all text-right"
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div className="mt-6 space-y-2">
+                                                <div className="flex justify-between items-end px-1">
+                                                    <div className="flex flex-col">
+                                                        <span className="text-[9px] font-black uppercase text-slate-500 italic leading-none mb-1 text-xs">Status do Objetivo</span>
+                                                        <span className={`text-[10px] font-bold ${remaining <= 0 ? 'text-amber-400' : 'text-slate-400'}`}>
+                                                            {remaining <= 0 ? 'Meta atingida! Parabéns! 🎉' : `Faltam ${formatCurrency(remaining)} para a meta`}
+                                                        </span>
+                                                    </div>
+                                                    <span className={`text-xs font-black ${progress >= 100 ? 'text-amber-500' : 'text-emerald-500'}`}>{Math.round(progress)}%</span>
+                                                </div>
+                                                <div className="h-3 w-full bg-[#18181b] rounded-full overflow-hidden border border-white/5 p-[2px]">
+                                                    <div 
+                                                        className={`h-full rounded-full bar-transition ${progress >= 100 ? 'bg-gradient-to-r from-amber-600 to-yellow-400 shadow-[0_0_15px_rgba(251,191,36,0.3)]' : 'bg-gradient-to-r from-emerald-600 to-emerald-400'}`}
+                                                        style={{ width: `${progress}%` }}
+                                                    ></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
 
-                        <div className="bg-card rounded-[2rem] border border-[#27272a] overflow-hidden shadow-2xl">
-                            <div className="p-8 border-b border-[#27272a] bg-white/[0.02]">
-                                <h3 className="font-bold text-sm uppercase tracking-widest text-slate-400">Gestão de Performance</h3>
-                            </div>
-                            <div className="p-8 space-y-6">
-                                {sellers.map(s => {
-                                    const progress = Math.min((s.sales / s.target) * 100, 100);
-                                    const remaining = s.target - s.sales;
-                                    const isLeader = s.id === sortedSales[0].id && s.sales > 0;
-                                    
-                                    return (
-                                        <div key={s.id} className="p-6 rounded-2xl bg-[#0c0c0e] border border-[#27272a] hover:border-slate-700 transition-all">
-                                            <div className="flex flex-col md:flex-row justify-between items-center gap-6">
-                                                
-                                                {/* Nome e Avatar */}
-                                                <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-80">
-                                                    <img 
-                                                        src={getAvatarUrl(s.name)} 
-                                                        alt={s.name} 
-                                                        className={`w-14 h-14 rounded-full border-2 ${isLeader ? 'border-emerald-500 leader-glow' : 'border-[#27272a]'} shadow-lg`} 
-                                                    />
-                                                    <div className="text-center md:text-left">
-                                                        <p className="font-black text-xl uppercase text-white leading-none mb-1">{s.name}</p>
-                                                        <p className="text-[10px] text-slate-500 font-bold uppercase italic text-emerald-500/50 tracking-wider">Meta: {formatCurrency(s.target)}</p>
-                                                        {isLeader && <span className="text-[9px] font-black text-emerald-500 uppercase tracking-widest animate-pulse">● Líder</span>}
-                                                    </div>
-                                                </div>
-                                                
-                                                <div className="grid grid-cols-2 gap-4 w-full max-w-md">
-                                                    {/* Campo Vendas */}
-                                                    <div className="space-y-1.5">
-                                                        <label className="text-[9px] font-black text-emerald-500/60 uppercase ml-2 italic">Vendas (R$)</label>
-                                                        <div className="input-currency-container">
-                                                            <span className="currency-symbol text-emerald-500">R$</span>
-                                                            <input 
-                                                                type="number" 
-                                                                value={s.sales}
-                                                                placeholder="0,00"
-                                                                onChange={(e) => handleUpdate(s.id, 'sales', e.target.value)}
-                                                                className="bg-[#18181b] border border-[#27272a] rounded-xl p-3 pl-9 text-sm font-mono text-emerald-400 focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 w-full transition-all text-right shadow-inner"
-                                                            />
-                                                        </div>
-                                                    </div>
-                                                    {/* Campo Contratos */}
-                                                    <div className="space-y-1.5">
-                                                        <label className="text-[9px] font-black text-blue-500/60 uppercase ml-2 italic">Contratos (R$)</label>
-                                                        <div className="input-currency-container">
-                                                            <span className="currency-symbol text-blue-500">R$</span>
-                                                            <input 
-                                                                type="number" 
-                                                                value={s.contracts}
-                                                                placeholder="0,00"
-                                                                onChange={(e) => handleUpdate(s.id, 'contracts', e.target.value)}
-                                                                className="bg-[#18181b] border border-[#27272a] rounded-xl p-3 pl-9 text-sm font-mono text-blue-400 focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/20 w-full transition-all text-right shadow-inner"
-                                                            />
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            
-                                            <div className="mt-6 space-y-2">
-                                                <div className="flex justify-between items-end px-1">
-                                                    <div className="flex flex-col">
-                                                        <span className="text-[9px] font-black uppercase text-slate-500 italic leading-none mb-1 text-xs tracking-tight">Status do Objetivo</span>
-                                                        <span className={`text-[10px] font-bold ${remaining <= 0 ? 'text-amber-400' : 'text-slate-400'}`}>
-                                                            {remaining <= 0 ? 'Meta atingida! Parabéns! 🎉' : `Faltam ${formatCurrency(remaining)} para a meta`}
-                                                        </span>
-                                                    </div>
-                                                    <span className={`text-xs font-black ${progress >= 100 ? 'text-amber-500' : 'text-emerald-500'}`}>{Math.round(progress)}%</span>
-                                                </div>
-                                                <div className="h-3 w-full bg-[#18181b] rounded-full overflow-hidden border border-white/5 p-[2px] shadow-inner">
-                                                    <div 
-                                                        className={`h-full rounded-full bar-transition ${progress >= 100 ? 'bg-gradient-to-r from-amber-600 to-yellow-400 shadow-[0_0_15px_rgba(251,191,36,0.3)]' : 'bg-gradient-to-r from-emerald-600 to-emerald-400'}`}
-                                                        style={{ width: `${progress}%` }}
-                                                    ></div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            );
-        }
-
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
-    </script>
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
 </body>
 </html>
-
-essa está perfeita
