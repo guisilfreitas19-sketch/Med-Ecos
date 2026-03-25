@@ -3,77 +3,144 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Monitor Financeiro Compacto</title>
+    <title>Monitor Financeiro TV</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        input::placeholder { color: #cbd5e1; font-weight: normal; }
-        .compact-input { @apply w-full p-2 bg-slate-50 border rounded-lg text-center font-bold text-sm outline-none focus:border-indigo-400; }
-    </style>
 </head>
 <body class="bg-slate-100 min-h-screen p-4">
 
-    <div class="max-w-[1400px] mx-auto">
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            
-            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-                <div class="bg-indigo-600 p-2 text-center text-white font-black text-sm tracking-widest uppercase">Medsystem</div>
-                
-                <div class="p-5 space-y-4">
-                    <div class="grid grid-cols-3 gap-3">
-                        <div class="col-span-3">
-                            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Faturamento Atual</label>
-                            <input type="text" id="med-atual" oninput="mascara(this, 'med', 'atual')" class="w-full p-3 bg-slate-50 border-2 border-slate-100 rounded-xl text-xl font-black text-center text-indigo-600 outline-none focus:border-indigo-500" placeholder="R$ 0,00">
-                        </div>
-                        <div>
-                            <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Mês 2025</label>
-                            <input type="text" id="med-ref2025" oninput="mascara(this, 'med', 'ref2025')" class="compact-input" placeholder="R$ 0,00">
-                        </div>
-                        <div>
-                            <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Pior 2026</label>
-                            <input type="text" id="med-pior2026" oninput="mascara(this, 'med', 'pior2026')" class="compact-input" placeholder="R$ 0,00">
-                        </div>
-                        <div>
-                            <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Recorde</label>
-                            <input type="text" id="med-melhor2026" oninput="mascara(this, 'med', 'melhor2026')" class="compact-input border-amber-200" placeholder="R$ 0,00">
-                        </div>
+    <div class="max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-2 gap-6">
+        
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+            <div class="bg-indigo-600 p-2 text-center text-white font-black text-sm uppercase">Medsystem</div>
+            <div class="p-5 space-y-4">
+                <div class="grid grid-cols-3 gap-3 text-center font-bold">
+                    <div class="col-span-3">
+                        <label class="text-[10px] text-slate-400 uppercase">Faturamento Atual</label>
+                        <input type="text" id="med-atual" oninput="processar(this, 'med', 'atual')" class="w-full p-3 bg-slate-50 border-2 border-slate-100 rounded-xl text-xl font-black text-center text-indigo-600 outline-none" placeholder="R$ 0,00">
                     </div>
-
-                    <div class="grid grid-cols-2 gap-3">
-                        <div id="res-med-2025" class="p-3 rounded-xl border-l-4 border-slate-200 bg-slate-50">
-                            <p class="text-[9px] font-bold text-slate-400 uppercase leading-none mb-1 text-nowrap">vs. Ano Anterior</p>
-                            <p id="txt-med-2025" class="text-sm font-black text-slate-400 uppercase">---</p>
-                        </div>
-                        <div id="res-med-pior" class="p-3 rounded-xl border-l-4 border-slate-200 bg-slate-50">
-                            <p class="text-[9px] font-bold text-slate-400 uppercase leading-none mb-1 text-nowrap">vs. Pior Mês</p>
-                            <p id="txt-med-pior" class="text-sm font-black text-slate-400 uppercase">---</p>
-                        </div>
+                    <div>
+                        <label class="text-[9px] text-slate-400 uppercase leading-none">Mês 2025</label>
+                        <input type="text" id="med-ref2025" oninput="processar(this, 'med', 'ref2025')" class="w-full p-2 bg-slate-50 border rounded-lg text-sm text-center outline-none" placeholder="R$ 0,00">
                     </div>
+                    <div>
+                        <label class="text-[9px] text-slate-400 uppercase leading-none">Pior 2026</label>
+                        <input type="text" id="med-pior2026" oninput="processar(this, 'med', 'pior2026')" class="w-full p-2 bg-slate-50 border rounded-lg text-sm text-center outline-none" placeholder="R$ 0,00">
+                    </div>
+                    <div>
+                        <label class="text-[9px] text-slate-400 uppercase leading-none">Recorde</label>
+                        <input type="text" id="med-melhor2026" oninput="processar(this, 'med', 'melhor2026')" class="w-full p-2 bg-slate-50 border rounded-lg text-sm text-center outline-none" placeholder="R$ 0,00">
+                    </div>
+                </div>
 
-                    <div class="bg-slate-900 p-4 rounded-xl text-white">
-                        <div class="flex justify-between items-end">
-                            <p class="text-[9px] font-bold text-indigo-300 uppercase leading-none">Rumo ao Recorde</p>
-                            <h2 id="txt-med-melhor" class="text-lg font-black text-yellow-400 leading-none">---</h2>
-                        </div>
-                        <div class="w-full bg-slate-700 rounded-full h-2 mt-3 overflow-hidden">
-                            <div id="bar-med" class="bg-yellow-400 h-full w-0 transition-all duration-700"></div>
-                        </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div id="res-med-2025" class="p-3 rounded-xl border-l-4 bg-slate-50 border-slate-200 text-center">
+                        <p class="text-[9px] font-bold text-slate-400 uppercase mb-1">vs. Ano Anterior</p>
+                        <p id="txt-med-2025" class="text-sm font-black text-slate-400 italic">---</p>
+                    </div>
+                    <div id="res-med-pior" class="p-3 rounded-xl border-l-4 bg-slate-50 border-slate-200 text-center">
+                        <p class="text-[9px] font-bold text-slate-400 uppercase mb-1">vs. Pior Mês</p>
+                        <p id="txt-med-pior" class="text-sm font-black text-slate-400 italic">---</p>
+                    </div>
+                </div>
+
+                <div class="bg-slate-900 p-4 rounded-xl text-white">
+                    <div class="flex justify-between items-end">
+                        <p class="text-[9px] font-bold text-indigo-300 uppercase leading-none">Rumo ao Recorde</p>
+                        <h2 id="txt-med-melhor" class="text-lg font-black text-yellow-400 leading-none">---</h2>
+                    </div>
+                    <div class="w-full bg-slate-700 rounded-full h-2 mt-3 overflow-hidden">
+                        <div id="bar-med" class="bg-yellow-400 h-full w-0 transition-all duration-700"></div>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-                <div class="bg-emerald-600 p-2 text-center text-white font-black text-sm tracking-widest uppercase">Ecos</div>
-                
-                <div class="p-5 space-y-4">
-                    <div class="grid grid-cols-3 gap-3">
-                        <div class="col-span-3">
-                            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Faturamento Atual</label>
-                            <input type="text" id="ecos-atual" oninput="mascara(this, 'ecos', 'atual')" class="w-full p-3 bg-slate-50 border-2 border-slate-100 rounded-xl text-xl font-black text-center text-emerald-600 outline-none focus:border-emerald-500" placeholder="R$ 0,00">
-                        </div>
-                        <div>
-                            <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Mês 2025</label>
-                            <input type="text" id="ecos-ref2025" oninput="mascara(this, 'ecos', 'ref2025')" class="compact-input" placeholder="R$ 0,00">
-                        </div>
-                        <div>
-                            <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Pior 2026</label>
-                            <input type="text" id="ecos-pior2026" oninput="mascara(this, 'ecos', 'pior2026')" class="compact-input"
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+            <div class="bg-emerald-600 p-2 text-center text-white font-black text-sm uppercase">Ecos</div>
+            <div class="p-5 space-y-4">
+                <div class="grid grid-cols-3 gap-3 text-center font-bold">
+                    <div class="col-span-3">
+                        <label class="text-[10px] text-slate-400 uppercase">Faturamento Atual</label>
+                        <input type="text" id="ecos-atual" oninput="processar(this, 'ecos', 'atual')" class="w-full p-3 bg-slate-50 border-2 border-slate-100 rounded-xl text-xl font-black text-center text-emerald-600 outline-none" placeholder="R$ 0,00">
+                    </div>
+                    <div>
+                        <label class="text-[9px] text-slate-400 uppercase leading-none">Mês 2025</label>
+                        <input type="text" id="ecos-ref2025" oninput="processar(this, 'ecos', 'ref2025')" class="w-full p-2 bg-slate-50 border rounded-lg text-sm text-center outline-none" placeholder="R$ 0,00">
+                    </div>
+                    <div>
+                        <label class="text-[9px] text-slate-400 uppercase leading-none">Pior 2026</label>
+                        <input type="text" id="ecos-pior2026" oninput="processar(this, 'ecos', 'pior2026')" class="w-full p-2 bg-slate-50 border rounded-lg text-sm text-center outline-none" placeholder="R$ 0,00">
+                    </div>
+                    <div>
+                        <label class="text-[9px] text-slate-400 uppercase leading-none">Recorde</label>
+                        <input type="text" id="ecos-melhor2026" oninput="processar(this, 'ecos', 'melhor2026')" class="w-full p-2 bg-slate-50 border rounded-lg text-sm text-center outline-none" placeholder="R$ 0,00">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div id="res-ecos-2025" class="p-3 rounded-xl border-l-4 bg-slate-50 border-slate-200 text-center">
+                        <p class="text-[9px] font-bold text-slate-400 uppercase mb-1">vs. Ano Anterior</p>
+                        <p id="txt-ecos-2025" class="text-sm font-black text-slate-400 italic">---</p>
+                    </div>
+                    <div id="res-ecos-pior" class="p-3 rounded-xl border-l-4 bg-slate-50 border-slate-200 text-center">
+                        <p class="text-[9px] font-bold text-slate-400 uppercase mb-1">vs. Pior Mês</p>
+                        <p id="txt-ecos-pior" class="text-sm font-black text-slate-400 italic">---</p>
+                    </div>
+                </div>
+
+                <div class="bg-slate-900 p-4 rounded-xl text-white">
+                    <div class="flex justify-between items-end">
+                        <p class="text-[9px] font-bold text-emerald-300 uppercase leading-none">Rumo ao Recorde</p>
+                        <h2 id="txt-ecos-melhor" class="text-lg font-black text-yellow-400 leading-none">---</h2>
+                    </div>
+                    <div class="w-full bg-slate-700 rounded-full h-2 mt-3 overflow-hidden">
+                        <div id="bar-ecos" class="bg-yellow-400 h-full w-0 transition-all duration-700"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const storeKey = 'dash_v_final';
+        let dados = JSON.parse(localStorage.getItem(storeKey)) || {
+            med: { atual: 0, ref2025: 0, pior2026: 0, melhor2026: 0 },
+            ecos: { atual: 0, ref2025: 0, pior2026: 0, melhor2026: 0 }
+        };
+
+        function format(v) { 
+            return v.toLocaleString('pt-br', { style: 'currency', currency: 'BRL' }); 
+        }
+
+        function clean(val) {
+            if (typeof val === 'string') {
+                return parseFloat(val.replace(/\D/g, '')) / 100 || 0;
+            }
+            return parseFloat(val) || 0;
+        }
+
+        function processar(input, emp, campo) {
+            let v = input.value.replace(/\D/g,'');
+            v = (v/100).toFixed(2) + '';
+            v = v.replace(".", ",");
+            v = v.replace(/(\d)(\d{3})(\d{3}),/g, "$1.$2.$3,");
+            v = v.replace(/(\d)(\d{3}),/g, "$1.$2,");
+            input.value = v !== '0,00' ? 'R$ ' + v : '';
+            
+            dados[emp][campo] = clean(v);
+            localStorage.setItem(storeKey, JSON.stringify(dados));
+            calcular(emp);
+        }
+
+        function calcular(emp) {
+            const a = dados[emp].atual;
+            const r = dados[emp].ref2025;
+            const p = dados[emp].pior2026;
+            const m = dados[emp].melhor2026;
+
+            // vs 2025
+            const card2025 = document.getElementById(`res-${emp}-2025`);
+            const txt2025 = document.getElementById(`txt-${emp}-2025`);
+            if(a > 0 && r > 0) {
+                const d = a - r;
+                card2025.className = `p-3 rounded-xl border-l-4 shadow
