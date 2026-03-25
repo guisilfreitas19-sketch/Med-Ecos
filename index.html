@@ -3,128 +3,97 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Comercial - Grupo Soitic</title>
+    <title>Ranking Comercial - Grupo Soitic</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #09090b; color: #f8fafc; }
+        body { font-family: 'Inter', sans-serif; }
+        .bg-background { background-color: #09090b; }
         .bg-card { background-color: #18181b; border: 1px solid #27272a; }
         input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-        .input-dark { background: #0c0c0e; border: 1px solid #27272a; color: #fff; padding: 6px 10px; border-radius: 8px; font-size: 12px; font-family: monospace; width: 100%; text-align: right; }
-        .label-mini { font-size: 9px; font-weight: 800; color: #71717a; text-transform: uppercase; margin-bottom: 2px; display: block; }
+        .bar-transition { transition: width 1s cubic-bezier(0.4, 0, 0.2, 1); }
+        .input-currency-container { position: relative; display: flex; align-items: center; }
+        .currency-symbol { position: absolute; left: 12px; font-weight: 800; font-size: 0.7rem; opacity: 0.5; pointer-events: none; }
     </style>
 </head>
-<body class="pb-20">
+<body class="bg-background text-slate-100 pb-20">
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect } = React;
+        const { useState, useMemo, useEffect } = React;
 
-        const formatCurrency = (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v);
+        const TrophyIcon = () => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+        );
+
+        const formatCurrency = (value) => {
+            return new Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: 'BRL',
+            }).format(value);
+        };
 
         function App() {
-            const [sellers, setSellers] = useState(() => {
-                const saved = localStorage.getItem('soitic_v6_data');
-                return saved ? JSON.parse(saved) : [
-                    { id: 1, name: 'Guilherme', company: 'MEDSYSTEM', sales: 0, target: 6000, lastYear: 0, best2026: 0, worst2026: 0 },
-                    { id: 2, name: 'Luiz', company: 'MEDSYSTEM', sales: 0, target: 3000, lastYear: 0, best2026: 0, worst2026: 0 },
-                    { id: 3, name: 'Vanessa', company: 'ECOS/RESERVIN', sales: 0, target: 6000, lastYear: 0, best2026: 0, worst2026: 0 },
-                    { id: 4, name: 'João', company: 'ECOS/RESERVIN', sales: 0, target: 3000, lastYear: 0, best2026: 0, worst2026: 0 }
-                ];
-            });
+            const initialState = JSON.parse(localStorage.getItem('soitic_manual_final')) || [
+                { id: 1, name: 'Guilherme', sales: 0, contracts: 0, target: 6000 },
+                { id: 2, name: 'Vanessa', sales: 0, contracts: 0, target: 6000 },
+                { id: 3, name: 'Luiz', sales: 0, contracts: 0, target: 3000 },
+                { id: 4, name: 'João', sales: 0, contracts: 0, target: 3000 }
+            ];
+
+            const [sellers, setSellers] = useState(initialState);
 
             useEffect(() => {
-                localStorage.setItem('soitic_v6_data', JSON.stringify(sellers));
+                localStorage.setItem('soitic_manual_final', JSON.stringify(sellers));
             }, [sellers]);
 
-            const update = (id, field, value) => {
-                setSellers(prev => prev.map(s => s.id === id ? { ...s, [field]: parseFloat(value) || 0 } : s));
+            const handleUpdate = (id, field, value) => {
+                const val = parseFloat(value) || 0;
+                setSellers(prev => prev.map(s => {
+                    if (s.id === id) {
+                        if (field === 'sales' && val >= s.target && s.sales < s.target) {
+                            confetti({
+                                particleCount: 150,
+                                spread: 70,
+                                origin: { y: 0.6 },
+                                colors: ['#fbbf24', '#10b981', '#ffffff']
+                            });
+                        }
+                        return { ...s, [field]: val };
+                    }
+                    return s;
+                }));
             };
 
-            return (
-                <div className="max-w-6xl mx-auto px-6 py-8">
-                    <header className="mb-10 flex justify-between items-end">
-                        <div>
-                            <h1 className="text-3xl font-black italic tracking-tighter uppercase">Grupo <span className="text-amber-500">Soitic</span></h1>
-                            <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest">Análise de Performance Comparativa</p>
+            const resetAll = () => {
+                if(confirm("Zerar todos os dados do Grupo Soitic?")) {
+                    setSellers(sellers.map(s => ({ ...s, sales: 0, contracts: 0 })));
+                }
+            };
+
+            const sortedSales = useMemo(() => [...sellers].sort((a, b) => b.sales - a.sales), [sellers]);
+            const sortedContracts = useMemo(() => [...sellers].sort((a, b) => b.contracts - a.contracts), [sellers]);
+
+            const Podium = ({ title, data, field, accentColor }) => (
+                <div className="bg-card rounded-2xl p-6 shadow-xl flex flex-col border border-[#27272a]">
+                    <div className="flex items-center gap-2 mb-8">
+                        <div className={`p-2 rounded-xl ${accentColor} bg-opacity-20`}>
+                            <TrophyIcon />
                         </div>
-                        <div className="text-right">
-                            <span className="text-[10px] font-bold text-zinc-600 block">MARÇO 2026</span>
-                            <span className="text-xs font-black text-emerald-500 uppercase">Live Dashboard</span>
-                        </div>
-                    </header>
-
-                    <div className="grid lg:grid-cols-2 gap-8">
-                        {['MEDSYSTEM', 'ECOS/RESERVIN'].map(company => (
-                            <section key={company} className="space-y-6">
-                                <div className="flex items-center gap-3 border-b border-zinc-800 pb-2">
-                                    <div className={`w-2 h-6 ${company === 'MEDSYSTEM' ? 'bg-blue-600' : 'bg-purple-600'}`}></div>
-                                    <h2 className="font-black text-lg uppercase tracking-tight">{company}</h2>
-                                </div>
-
-                                {sellers.filter(s => s.company === company).map(s => {
-                                    const diffYear = s.sales - s.lastYear;
-                                    const progress = (s.sales / s.target) * 100;
-
-                                    return (
-                                        <div key={s.id} className="bg-card rounded-2xl p-5 shadow-lg border-l-4 border-l-zinc-700 hover:border-l-amber-500 transition-all">
-                                            <div className="flex justify-between items-start mb-6">
-                                                <div>
-                                                    <h3 className="text-xl font-black uppercase italic leading-none">{s.name}</h3>
-                                                    <span className="text-[10px] font-bold text-zinc-500">META: {formatCurrency(s.target)}</span>
-                                                </div>
-                                                <div className="text-right">
-                                                    <span className={`text-xl font-mono font-bold ${progress >= 100 ? 'text-amber-500' : 'text-emerald-400'}`}>
-                                                        {formatCurrency(s.sales)}
-                                                    </span>
-                                                    <div className="h-1.5 w-32 bg-zinc-800 rounded-full mt-1 overflow-hidden">
-                                                        <div className="h-full bg-current" style={{ width: `${Math.min(progress, 100)}%`, color: progress >= 100 ? '#fbbf24' : '#10b981' }}></div>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                                                <div>
-                                                    <label className="label-mini">Atual (R$)</label>
-                                                    <input type="number" value={s.sales} onChange={e => update(s.id, 'sales', e.target.value)} className="input-dark border-emerald-900/30" />
-                                                </div>
-                                                <div>
-                                                    <label className="label-mini">Mesmo Mês/25</label>
-                                                    <input type="number" value={s.lastYear} onChange={e => update(s.id, 'lastYear', e.target.value)} className="input-dark" />
-                                                    <span className={`text-[9px] font-bold mt-1 block ${diffYear >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>
-                                                        {diffYear >= 0 ? '▲' : '▼'} {formatCurrency(Math.abs(diffYear))}
-                                                    </span>
-                                                </div>
-                                                <div>
-                                                    <label className="label-mini">Melhor 2026</label>
-                                                    <input type="number" value={s.best2026} onChange={e => update(s.id, 'best2026', e.target.value)} className="input-dark border-blue-900/30 text-blue-400" />
-                                                </div>
-                                                <div>
-                                                    <label className="label-mini">Pior 2026</label>
-                                                    <input type="number" value={s.worst2026} onChange={e => update(s.id, 'worst2026', e.target.value)} className="input-dark border-red-900/30 text-red-400" />
-                                                </div>
-                                            </div>
-                                        </div>
-                                    );
-                                })}
-                            </section>
-                        ))}
+                        <h3 className="font-bold text-sm uppercase tracking-widest text-slate-400">{title}</h3>
                     </div>
                     
-                    <footer className="mt-12 pt-6 border-t border-zinc-800 text-center">
-                        <button onClick={() => { if(confirm('Zerar?')) setSellers(s => s.map(v => ({...v, sales: 0}))) }} className="text-[10px] font-bold text-zinc-600 hover:text-red-500 uppercase tracking-widest">
-                            Reiniciar Ciclo Mensal
-                        </button>
-                    </footer>
-                </div>
-            );
-        }
-
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
-    </script>
-</body>
-</html>
+                    <div className="flex items-end justify-center gap-3 h-36 mt-auto">
+                        <div className="flex flex-col items-center w-full">
+                            <span className="text-[10px] font-bold text-slate-500 mb-1 truncate w-full text-center">{data[1].name}</span>
+                            <div className="w-full bg-[#27272a] h-16 rounded-t-xl flex items-center justify-center border-t border-white/5">
+                                <span className="text-[9px] font-mono font-bold text-slate-300 px-1 text-center">
+                                    {formatCurrency(data[1][field])}
+                                </span>
+                            </div>
+                        </div>
+                        <div className="flex flex-col items-center w-full">
