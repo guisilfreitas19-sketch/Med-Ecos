@@ -3,10 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Dual - Med/Ecos</title>
+    <title>Dashboard Med/Ecos Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        .tab-active { border-bottom: 4px solid #4f46e5; color: #4f46e5; font-bold: true; }
+        .tab-active { border-bottom: 4px solid #4f46e5; color: #4f46e5; font-weight: bold; }
+        input::placeholder { color: #cbd5e1; font-weight: normal; }
     </style>
 </head>
 <body class="bg-gray-100 min-h-screen">
@@ -21,118 +22,39 @@
     <div class="max-w-md mx-auto p-4 space-y-6">
         
         <div class="bg-white p-6 rounded-2xl shadow-sm space-y-4">
-            <h2 class="text-xs font-black text-gray-400 uppercase">Entrada de Dados - <span id="label-empresa">MEDSYSTEM</span></h2>
+            <h2 class="text-xs font-black text-gray-400 uppercase tracking-wider">Entrada de Dados - <span id="label-empresa">MEDSYSTEM</span></h2>
             
             <div class="grid grid-cols-2 gap-3">
                 <div class="col-span-2">
                     <label class="block text-xs font-bold text-gray-500 uppercase">Faturamento Mês Atual</label>
-                    <input type="number" id="atual" oninput="salvarECalcular()" class="w-full mt-1 p-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:border-indigo-500 outline-none text-lg font-bold">
+                    <input type="text" id="atual" oninput="aplicarMascara(this, 'atual')" class="w-full mt-1 p-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:border-indigo-500 outline-none text-lg font-bold" placeholder="R$ 0,00">
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-gray-500 uppercase">Mesmo Mês 2025</label>
-                    <input type="number" id="ref2025" oninput="salvarECalcular()" class="w-full mt-1 p-2 bg-gray-50 border rounded-lg">
+                    <input type="text" id="ref2025" oninput="aplicarMascara(this, 'ref2025')" class="w-full mt-1 p-2 bg-gray-50 border rounded-lg outline-none focus:border-indigo-400" placeholder="R$ 0,00">
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-gray-500 uppercase">Pior Mês 2026</label>
-                    <input type="number" id="pior2026" oninput="salvarECalcular()" class="w-full mt-1 p-2 bg-gray-50 border rounded-lg">
+                    <input type="text" id="pior2026" oninput="aplicarMascara(this, 'pior2026')" class="w-full mt-1 p-2 bg-gray-50 border rounded-lg outline-none focus:border-indigo-400" placeholder="R$ 0,00">
                 </div>
                 <div class="col-span-2">
-                    <label class="block text-xs font-bold text-gray-500 uppercase">Recorde (Melhor Mês 2026)</label>
-                    <input type="number" id="melhor2026" oninput="salvarECalcular()" class="w-full mt-1 p-2 bg-gray-50 border rounded-lg">
+                    <label class="block text-xs font-bold text-gray-500 uppercase">Melhor Mês 2026 (Recorde)</label>
+                    <input type="text" id="melhor2026" oninput="aplicarMascara(this, 'melhor2026')" class="w-full mt-1 p-2 bg-gray-50 border rounded-lg outline-none focus:border-indigo-400" placeholder="R$ 0,00">
                 </div>
             </div>
         </div>
 
-        <div class="space-y-3">
+        <div class="space-y-3 text-center">
             <div id="card2025" class="bg-white p-4 rounded-xl border-l-4 border-gray-200 shadow-sm transition-all">
-                <p class="text-[10px] font-black text-gray-400 uppercase">Comparativo Anual (2025)</p>
+                <p class="text-[10px] font-black text-gray-400 uppercase leading-none mb-1">Comparativo Anual (2025)</p>
                 <p id="txt2025" class="text-lg font-bold text-gray-300 italic">Insira os valores</p>
             </div>
 
             <div id="cardPior" class="bg-white p-4 rounded-xl border-l-4 border-gray-200 shadow-sm transition-all">
-                <p class="text-[10px] font-black text-gray-400 uppercase">Evolução sobre o Pior Mês</p>
+                <p class="text-[10px] font-black text-gray-400 uppercase leading-none mb-1">Evolução sobre o Pior Mês</p>
                 <p id="txtPior" class="text-lg font-bold text-gray-300 italic">Aguardando...</p>
             </div>
 
-            <div class="bg-slate-900 p-5 rounded-2xl text-white shadow-xl shadow-indigo-200">
+            <div class="bg-slate-900 p-5 rounded-2xl text-white shadow-lg relative overflow-hidden">
                 <p class="text-[10px] font-black text-indigo-300 uppercase">Meta de Recorde</p>
-                <h2 id="txtMelhor" class="text-2xl font-black mt-1 text-yellow-400">---</h2>
-                <div class="w-full bg-slate-700 rounded-full h-3 mt-4 overflow-hidden">
-                    <div id="barraProgresso" class="bg-gradient-to-r from-yellow-500 to-yellow-200 h-full w-0 transition-all duration-700"></div>
-                </div>
-            </div>
-        </div>
-
-        <p class="text-center text-[10px] text-gray-400 uppercase tracking-widest">Dados salvos localmente no dispositivo</p>
-    </div>
-
-    <script>
-        let abaAtual = 'med';
-        const dados = JSON.parse(localStorage.getItem('dash_financeiro')) || {
-            med: { atual: '', ref2025: '', pior2026: '', melhor2026: '' },
-            ecos: { atual: '', ref2025: '', pior2026: '', melhor2026: '' }
-        };
-
-        function mudarAba(aba) {
-            abaAtual = aba;
-            document.getElementById('btn-med').className = `flex-1 py-4 text-center font-bold uppercase ${aba === 'med' ? 'tab-active' : 'text-gray-400'}`;
-            document.getElementById('btn-ecos').className = `flex-1 py-4 text-center font-bold uppercase ${aba === 'ecos' ? 'tab-active' : 'text-gray-400'}`;
-            document.getElementById('label-empresa').innerText = aba.toUpperCase();
-            
-            // Carregar valores da aba selecionada
-            document.getElementById('atual').value = dados[aba].atual;
-            document.getElementById('ref2025').value = dados[aba].ref2025;
-            document.getElementById('pior2026').value = dados[aba].pior2026;
-            document.getElementById('melhor2026').value = dados[aba].melhor2026;
-            
-            calcular();
-        }
-
-        function salvarECalcular() {
-            dados[abaAtual].atual = document.getElementById('atual').value;
-            dados[abaAtual].ref2025 = document.getElementById('ref2025').value;
-            dados[abaAtual].pior2026 = document.getElementById('pior2026').value;
-            dados[abaAtual].melhor2026 = document.getElementById('melhor2026').value;
-            
-            localStorage.setItem('dash_financeiro', JSON.stringify(dados));
-            calcular();
-        }
-
-        function formatar(v) { return Number(v).toLocaleString('pt-br', {style:'currency', currency:'BRL'}); }
-
-        function calcular() {
-            const a = parseFloat(dados[abaAtual].atual) || 0;
-            const r = parseFloat(dados[abaAtual].ref2025) || 0;
-            const p = parseFloat(dados[abaAtual].pior2026) || 0;
-            const m = parseFloat(dados[abaAtual].melhor2026) || 0;
-
-            // vs 2025
-            if(a > 0 && r > 0) {
-                const d = a - r;
-                document.getElementById('card2025').className = `bg-white p-4 rounded-xl border-l-4 shadow-sm ${d >= 0 ? 'border-green-500' : 'border-red-500'}`;
-                document.getElementById('txt2025').innerText = `${d >= 0 ? '+' : ''} ${formatar(d)} ${d >= 0 ? 'acima ✅' : 'abaixo 📉'}`;
-                document.getElementById('txt2025').className = `text-lg font-bold ${d >= 0 ? 'text-green-600' : 'text-red-600'}`;
-            }
-
-            // vs Pior
-            if(a > 0 && p > 0) {
-                const d = a - p;
-                document.getElementById('cardPior').className = "bg-white p-4 rounded-xl border-l-4 shadow-sm border-blue-500";
-                document.getElementById('txtPior').innerText = `+ ${formatar(d)} acima do pior ✅`;
-                document.getElementById('txtPior').className = "text-lg font-bold text-blue-600";
-            }
-
-            // Recorde
-            if(a > 0 && m > 0) {
-                const f = m - a;
-                const perc = Math.min((a/m)*100, 100);
-                document.getElementById('barraProgresso').style.width = perc + '%';
-                document.getElementById('txtMelhor').innerText = f > 0 ? `Faltam: ${formatar(f)}` : "🎉 RECORDE BATIDO!";
-            }
-        }
-
-        // Iniciar
-        mudarAba('med');
-    </script>
-</body>
-</html>
+                <h2 id="txtMelhor" class="text-2xl font-black mt-1 text-yellow-4
