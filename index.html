@@ -3,53 +3,104 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Finance Dashboard Pro</title>
+    <title>Dashboard Med/Ecos</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        .glass { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px); }
-        .tab-active { color: #4f46e5; border-bottom: 3px solid #4f46e5; background: #f5f3ff; }
-        .input-field { transition: all 0.3s ease; border: 2px solid #f3f4f6; }
-        .input-field:focus { border-color: #4f46e5; background: white; box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1); }
+        .tab-active { border-bottom: 4px solid #4f46e5; color: #4f46e5; font-weight: bold; }
     </style>
 </head>
-<body class="bg-[#F8FAFC] min-h-screen font-sans antialiased text-slate-900">
+<body class="bg-gray-100 min-h-screen">
 
-    <header class="bg-white shadow-sm sticky top-0 z-20">
-        <div class="flex max-w-lg mx-auto">
-            <button onclick="mudarAba('med')" id="btn-med" class="flex-1 py-4 text-sm font-black uppercase tracking-widest transition-all tab-active">
-                <i class="fa-solid fa-briefcase-medical mr-2"></i>MEDSYSTEM
-            </button>
-            <button onclick="mudarAba('ecos')" id="btn-ecos" class="flex-1 py-4 text-sm font-black uppercase tracking-widest text-slate-400 transition-all">
-                <i class="fa-solid fa-leaf mr-2"></i>ECOS
-            </button>
+    <div class="bg-white shadow-sm sticky top-0 z-10">
+        <div class="flex max-w-md mx-auto">
+            <button onclick="mudarAba('med')" id="btn-med" class="flex-1 py-4 text-center font-bold uppercase tracking-wider tab-active">Medsystem</button>
+            <button onclick="mudarAba('ecos')" id="btn-ecos" class="flex-1 py-4 text-center font-bold uppercase tracking-wider text-gray-400">Ecos</button>
         </div>
-    </header>
+    </div>
 
-    <main class="max-w-lg mx-auto p-4 space-y-5">
+    <div class="max-w-md mx-auto p-4 space-y-6">
         
-        <section class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100">
-            <div class="flex items-center justify-between mb-4">
-                <h2 class="text-[10px] font-black text-slate-400 uppercase tracking-tighter">Entrada de Dados</h2>
-                <span class="px-3 py-1 bg-indigo-50 text-indigo-600 rounded-full text-[10px] font-bold" id="badge-empresa">MEDSYSTEM</span>
-            </div>
+        <div class="bg-white p-6 rounded-2xl shadow-sm space-y-4">
+            <h2 class="text-xs font-black text-gray-400 uppercase tracking-wider">Entrada de Dados - <span id="label-empresa">MEDSYSTEM</span></h2>
             
-            <div class="space-y-4">
-                <div>
-                    <label class="text-[10px] font-bold text-slate-500 uppercase ml-1">Faturamento Atual</label>
-                    <input type="number" id="atual" oninput="salvarECalcular()" class="input-field w-full mt-1 p-4 bg-slate-50 rounded-2xl text-2xl font-black text-indigo-600 outline-none" placeholder="R$ 0,00">
-                </div>
-                
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="text-[10px] font-bold text-slate-500 uppercase ml-1">Ref. 2025</label>
-                        <input type="number" id="ref2025" oninput="salvarECalcular()" class="input-field w-full mt-1 p-3 bg-slate-50 rounded-xl text-sm font-bold" placeholder="2025">
-                    </div>
-                    <div>
-                        <label class="text-[10px] font-bold text-slate-500 uppercase ml-1">Pior 2026</label>
-                        <input type="number" id="pior2026" oninput="salvarECalcular()" class="input-field w-full mt-1 p-3 bg-slate-50 rounded-xl text-sm font-bold" placeholder="Pior">
-                    </div>
+            <div class="grid grid-cols-2 gap-3">
+                <div class="col-span-2">
+                    <label class="block text-xs font-bold text-gray-500 uppercase">Faturamento Mês Atual</label>
+                    <input type="number" id="atual" oninput="salvarECalcular()" class="w-full mt-1 p-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:border-indigo-500 outline-none text-lg font-bold">
                 </div>
                 <div>
-                    <label class="text-[10px] font-bold text-slate-500 uppercase ml-1">Meta Recorde (Melhor Mês)</label>
-                    <input type="number" id="melhor2026" oninput="salvar
+                    <label class="block text-xs font-bold text-gray-500 uppercase">Mesmo Mês 2025</label>
+                    <input type="number" id="ref2025" oninput="salvarECalcular()" class="w-full mt-1 p-2 bg-gray-50 border rounded-lg">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase">Pior Mês 2026</label>
+                    <input type="number" id="pior2026" oninput="salvarECalcular()" class="w-full mt-1 p-2 bg-gray-50 border rounded-lg">
+                </div>
+                <div class="col-span-2">
+                    <label class="block text-xs font-bold text-gray-500 uppercase">Melhor Mês 2026 (Recorde)</label>
+                    <input type="number" id="melhor2026" oninput="salvarECalcular()" class="w-full mt-1 p-2 bg-gray-50 border rounded-lg">
+                </div>
+            </div>
+        </div>
+
+        <div class="space-y-3 text-center">
+            <div id="card2025" class="bg-white p-4 rounded-xl border-l-4 border-gray-200 shadow-sm transition-all">
+                <p class="text-[10px] font-black text-gray-400 uppercase">Comparativo Anual (2025)</p>
+                <p id="txt2025" class="text-lg font-bold text-gray-300 italic">Insira os valores</p>
+            </div>
+
+            <div id="cardPior" class="bg-white p-4 rounded-xl border-l-4 border-gray-200 shadow-sm transition-all">
+                <p class="text-[10px] font-black text-gray-400 uppercase">Evolução sobre o Pior Mês</p>
+                <p id="txtPior" class="text-lg font-bold text-gray-300 italic">Aguardando...</p>
+            </div>
+
+            <div class="bg-slate-900 p-5 rounded-2xl text-white shadow-lg">
+                <p class="text-[10px] font-black text-indigo-300 uppercase">Meta de Recorde</p>
+                <h2 id="txtMelhor" class="text-2xl font-black mt-1 text-yellow-400 italic">---</h2>
+                <div class="w-full bg-slate-700 rounded-full h-3 mt-4 overflow-hidden">
+                    <div id="barraProgresso" class="bg-yellow-400 h-full w-0 transition-all duration-700"></div>
+                </div>
+            </div>
+        </div>
+
+        <p class="text-center text-[10px] text-gray-400 uppercase tracking-widest pt-4">Dados salvos no dispositivo</p>
+    </div>
+
+    <script>
+        let abaAtual = 'med';
+        const dados = JSON.parse(localStorage.getItem('dash_financeiro_v1')) || {
+            med: { atual: '', ref2025: '', pior2026: '', melhor2026: '' },
+            ecos: { atual: '', ref2025: '', pior2026: '', melhor2026: '' }
+        };
+
+        function mudarAba(aba) {
+            abaAtual = aba;
+            document.getElementById('btn-med').className = `flex-1 py-4 text-center font-bold uppercase ${aba === 'med' ? 'tab-active' : 'text-gray-400'}`;
+            document.getElementById('btn-ecos').className = `flex-1 py-4 text-center font-bold uppercase ${aba === 'ecos' ? 'tab-active' : 'text-gray-400'}`;
+            document.getElementById('label-empresa').innerText = aba.toUpperCase();
+            
+            document.getElementById('atual').value = dados[aba].atual;
+            document.getElementById('ref2025').value = dados[aba].ref2025;
+            document.getElementById('pior2026').value = dados[aba].pior2026;
+            document.getElementById('melhor2026').value = dados[aba].melhor2026;
+            
+            calcular();
+        }
+
+        function salvarECalcular() {
+            dados[abaAtual].atual = document.getElementById('atual').value;
+            dados[abaAtual].ref2025 = document.getElementById('ref2025').value;
+            dados[abaAtual].pior2026 = document.getElementById('pior2026').value;
+            dados[abaAtual].melhor2026 = document.getElementById('melhor2026').value;
+            
+            localStorage.setItem('dash_financeiro_v1', JSON.stringify(dados));
+            calcular();
+        }
+
+        function formatar(v) { return Number(v).toLocaleString('pt-br', {style:'currency', currency:'BRL'}); }
+
+        function calcular() {
+            const a = parseFloat(dados[abaAtual].atual) || 0;
+            const r = parseFloat(dados[abaAtual].ref2025) || 0;
+            const p = parseFloat(dados[abaAtual].pior2026) || 0;
+            const m = parseFloat(dados[abaAtual].melhor2026) ||
