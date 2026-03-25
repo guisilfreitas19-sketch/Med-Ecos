@@ -3,152 +3,71 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ranking Março/26 - Grupo Soitic</title>
+    <title>Ranking Comercial - Grupo Soitic</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #09090b; color: #f8fafc; }
         .bg-card { background-color: #18181b; border: 1px solid #27272a; }
+        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
         .bar-transition { transition: width 1.5s cubic-bezier(0.34, 1.56, 0.64, 1); }
     </style>
 </head>
-<body>
+<body class="pb-20">
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect, useMemo } = React;
+        const { useState, useMemo, useEffect } = React;
 
-        const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTeqDgQxN1x6PHp_P6LFiWbUM9n6TzqrNYg928ibxN79YNOsV_24dYR2_Gj-ZhaoCwElnjvCfUYxlLJ/pub?gid=752707603&single=true&output=csv";
+        const TrophyIcon = () => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+        );
 
-        const formatCurrency = (val) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
+        const formatCurrency = (value) => {
+            return new Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: 'BRL',
+            }).format(value);
+        };
 
         function App() {
-            const [sellers, setSellers] = useState([]);
-            const [loading, setLoading] = useState(true);
+            const initialState = JSON.parse(localStorage.getItem('soitic_manual_v1')) || [
+                { id: 1, name: 'Guilherme', sales: 0, contracts: 0, target: 6000 },
+                { id: 2, name: 'Vanessa', sales: 0, contracts: 0, target: 6000 },
+                { id: 3, name: 'Luiz', sales: 0, contracts: 0, target: 3000 },
+                { id: 4, name: 'João', sales: 0, contracts: 0, target: 3000 }
+            ];
 
-            const fetchData = async () => {
-                try {
-                    const response = await fetch(SHEET_URL);
-                    const text = await response.text();
-                    const rows = text.split('\n');
-                    
-                    const sellersConfig = [
-                        { name: 'Guilherme', target: 6000 },
-                        { name: 'Vanessa', target: 6000 },
-                        { name: 'Luiz', target: 3000 },
-                        { name: 'João', target: 3000 }
-                    ];
-
-                    // Variável para controlar se entramos no bloco de Março/26
-                    let isMarchBlock = false;
-
-                    const updatedData = sellersConfig.map(vendedor => {
-                        let totalSales = 0;
-                        
-                        // Percorre as linhas para achar o vendedor DENTRO do bloco mar./26
-                        for (let i = 0; i < rows.length; i++) {
-                            const row = rows[i].toLowerCase();
-                            
-                            // Detecta o início do bloco de Março
-                            if (row.includes("mar./26")) {
-                                isMarchBlock = true;
-                            }
-                            // Se encontrar o total do mês ou outro mês, sai do bloco
-                            if (isMarchBlock && row.includes("total") && !row.includes(vendedor.name.toLowerCase())) {
-                                // Aqui não resetamos o isMarchBlock imediatamente para permitir a busca de todos, 
-                                // mas a lógica abaixo garante a precisão.
-                            }
-
-                            if (isMarchBlock && row.includes(vendedor.name.toLowerCase())) {
-                                const columns = rows[i].split(',');
-                                // Coluna F (Index 5) - Total Geral
-                                let rawValue = columns[5] || "0";
-                                const cleanValue = rawValue.replace(/[R$\s\.]/g, '').replace(',', '.');
-                                totalSales = parseFloat(cleanValue) || 0;
-                                break; // Encontrou o valor de março, para a busca para esse vendedor
-                            }
-                        }
-                        return { ...vendedor, sales: totalSales };
-                    });
-
-                    setSellers(updatedData);
-                    setLoading(false);
-                } catch (e) { console.error("Erro:", e); }
-            };
+            const [sellers, setSellers] = useState(initialState);
 
             useEffect(() => {
-                fetchData();
-                const timer = setInterval(fetchData, 30000);
-                return () => clearInterval(timer);
-            }, []);
+                localStorage.setItem('soitic_manual_v1', JSON.stringify(sellers));
+            }, [sellers]);
 
-            const sorted = useMemo(() => [...sellers].sort((a, b) => b.sales - a.sales), [sellers]);
+            const handleUpdate = (id, field, value) => {
+                const val = parseFloat(value) || 0;
+                setSellers(prev => prev.map(s => {
+                    if (s.id === id) {
+                        if (field === 'sales' && val >= s.target && s.sales < s.target) {
+                            confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: ['#fbbf24', '#10b981', '#ffffff'] });
+                        }
+                        return { ...s, [field]: val };
+                    }
+                    return s;
+                }));
+            };
 
-            if (loading) return <div className="h-screen flex items-center justify-center font-black text-slate-700 uppercase tracking-widest">Sincronizando Março...</div>;
+            const resetAll = () => {
+                if(confirm("Zerar todos os dados do ranking?")) {
+                    setSellers(sellers.map(s => ({ ...s, sales: 0, contracts: 0 })));
+                }
+            };
 
-            return (
-                <div className="max-w-4xl mx-auto px-6 py-12 space-y-10">
-                    <header className="text-center">
-                        <h1 className="text-5xl font-black italic uppercase tracking-tighter text-white">GRUPO <span className="text-emerald-500">SOITIC</span></h1>
-                        <p className="text-[10px] text-slate-500 font-bold uppercase tracking-[0.5em] mt-2">Ranking Março / 2026</p>
-                    </header>
+            const sortedSales = useMemo(() => [...sellers].sort((a, b) => b.sales - a.sales), [sellers]);
+            const sortedContracts = useMemo(() => [...sellers].sort((a, b) => b.contracts - a.contracts), [sellers]);
 
-                    <div className="bg-card rounded-[3rem] p-10 shadow-2xl relative border border-white/5">
-                        {/* Pódio Centralizado */}
-                        <div className="flex items-end justify-center gap-4 h-44 mb-12 border-b border-slate-800/50 pb-8">
-                            <div className="flex flex-col items-center w-full max-w-[120px]">
-                                <span className="text-[10px] font-bold text-slate-400 mb-1 truncate text-center">{sorted[1]?.name}</span>
-                                <div className="w-full bg-slate-800 h-16 rounded-t-xl flex items-center justify-center font-mono text-[9px]">{formatCurrency(sorted[1]?.sales)}</div>
-                            </div>
-                            <div className="flex flex-col items-center w-full max-w-[140px]">
-                                <span className="text-xs font-black text-emerald-400 mb-1 truncate text-center uppercase">{sorted[0]?.name}</span>
-                                <div className="w-full bg-emerald-600 h-28 rounded-t-xl flex flex-col items-center justify-center shadow-lg border-t border-white/20">
-                                    <span className="text-3xl font-black italic text-white">1º</span>
-                                    <span className="text-[10px] font-bold text-white">{formatCurrency(sorted[0]?.sales)}</span>
-                                </div>
-                            </div>
-                            <div className="flex flex-col items-center w-full max-w-[120px]">
-                                <span className="text-[10px] font-bold text-slate-500 mb-1 truncate text-center">{sorted[2]?.name}</span>
-                                <div className="w-full bg-slate-800/40 h-10 rounded-t-xl flex items-center justify-center font-mono text-[8px] opacity-40">{formatCurrency(sorted[2]?.sales)}</div>
-                            </div>
-                        </div>
-
-                        {/* Barras de Desempenho */}
-                        <div className="grid gap-8">
-                            {sellers.map(s => {
-                                const progress = Math.min((s.sales / s.target) * 100, 100);
-                                return (
-                                    <div key={s.name} className="space-y-2">
-                                        <div className="flex justify-between items-end px-1">
-                                            <div>
-                                                <span className="text-sm font-black uppercase text-white">{s.name}</span>
-                                                <span className="text-[9px] text-slate-500 font-bold block uppercase mt-0.5">Meta: {formatCurrency(s.target)}</span>
-                                            </div>
-                                            <div className="text-right">
-                                                <span className="text-xs font-mono font-bold text-emerald-400">{formatCurrency(s.sales)}</span>
-                                                <span className={`text-[10px] font-black ml-3 ${progress >= 100 ? 'text-amber-500' : 'text-slate-500'}`}>{Math.round(progress)}%</span>
-                                            </div>
-                                        </div>
-                                        <div className="h-2.5 w-full bg-slate-900 rounded-full overflow-hidden p-[1px] border border-white/5">
-                                            <div 
-                                                className={`h-full rounded-full bar-transition ${progress >= 100 ? 'bg-gradient-to-r from-amber-600 to-yellow-400' : 'bg-emerald-500'}`}
-                                                style={{ width: `${progress}%` }}
-                                            ></div>
-                                        </div>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    </div>
-                </div>
-            );
-        }
-
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
-    </script>
-</body>
-</html>
+            const Podium = ({ title, data, field, accentColor }) => (
