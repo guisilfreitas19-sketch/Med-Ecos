@@ -3,18 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ranking Comercial - Grupo Soitic</title>
+    <title>Ranking Março/26 - Grupo Soitic</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #09090b; color: #f8fafc; overflow-x: hidden; }
+        body { font-family: 'Inter', sans-serif; background-color: #09090b; color: #f8fafc; }
         .bg-card { background-color: #18181b; border: 1px solid #27272a; }
         .bar-transition { transition: width 1.5s cubic-bezier(0.34, 1.56, 0.64, 1); }
-        @keyframes pulse-soft { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-        .animate-pulse-soft { animation: pulse-soft 3s infinite; }
     </style>
 </head>
 <body>
@@ -44,126 +42,99 @@
                         { name: 'João', target: 3000 }
                     ];
 
+                    // Variável para controlar se entramos no bloco de Março/26
+                    let isMarchBlock = false;
+
                     const updatedData = sellersConfig.map(vendedor => {
-                        const row = rows.find(r => r.includes(vendedor.name));
-                        if (row) {
-                            const columns = row.split(',');
-                            // Coluna F (Total Geral) é o index 5
-                            let rawValue = columns[5] || "0";
-                            // Limpa R$, pontos de milhar e troca vírgula por ponto
-                            const cleanValue = rawValue.replace(/[R$\s]/g, '').replace(/\./g, '').replace(',', '.');
-                            const totalSales = parseFloat(cleanValue) || 0;
-                            return { ...vendedor, sales: totalSales };
+                        let totalSales = 0;
+                        
+                        // Percorre as linhas para achar o vendedor DENTRO do bloco mar./26
+                        for (let i = 0; i < rows.length; i++) {
+                            const row = rows[i].toLowerCase();
+                            
+                            // Detecta o início do bloco de Março
+                            if (row.includes("mar./26")) {
+                                isMarchBlock = true;
+                            }
+                            // Se encontrar o total do mês ou outro mês, sai do bloco
+                            if (isMarchBlock && row.includes("total") && !row.includes(vendedor.name.toLowerCase())) {
+                                // Aqui não resetamos o isMarchBlock imediatamente para permitir a busca de todos, 
+                                // mas a lógica abaixo garante a precisão.
+                            }
+
+                            if (isMarchBlock && row.includes(vendedor.name.toLowerCase())) {
+                                const columns = rows[i].split(',');
+                                // Coluna F (Index 5) - Total Geral
+                                let rawValue = columns[5] || "0";
+                                const cleanValue = rawValue.replace(/[R$\s\.]/g, '').replace(',', '.');
+                                totalSales = parseFloat(cleanValue) || 0;
+                                break; // Encontrou o valor de março, para a busca para esse vendedor
+                            }
                         }
-                        return { ...vendedor, sales: 0 };
+                        return { ...vendedor, sales: totalSales };
                     });
 
                     setSellers(updatedData);
                     setLoading(false);
-                } catch (e) { 
-                    console.error("Erro na sincronização", e); 
-                }
+                } catch (e) { console.error("Erro:", e); }
             };
 
             useEffect(() => {
                 fetchData();
-                const timer = setInterval(fetchData, 30000); // Atualiza a cada 30 segundos
+                const timer = setInterval(fetchData, 30000);
                 return () => clearInterval(timer);
             }, []);
 
             const sorted = useMemo(() => [...sellers].sort((a, b) => b.sales - a.sales), [sellers]);
 
-            if (loading) return (
-                <div className="h-screen flex flex-col items-center justify-center space-y-4">
-                    <div className="w-12 h-12 border-4 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin"></div>
-                    <p className="text-slate-500 font-black uppercase tracking-[0.3em] text-xs">Sincronizando Grupo Soitic...</p>
-                </div>
-            );
+            if (loading) return <div className="h-screen flex items-center justify-center font-black text-slate-700 uppercase tracking-widest">Sincronizando Março...</div>;
 
             return (
-                <div className="max-w-4xl mx-auto px-6 py-12 lg:py-20 space-y-12">
-                    <header className="text-center relative">
-                        <h1 className="text-5xl md:text-6xl font-black italic uppercase tracking-tighter text-white">
-                            GRUPO <span className="text-emerald-500">SOITIC</span>
-                        </h1>
-                        <p className="text-[10px] text-slate-500 font-bold uppercase tracking-[0.6em] mt-3">Ranking Comercial de Resultados</p>
+                <div className="max-w-4xl mx-auto px-6 py-12 space-y-10">
+                    <header className="text-center">
+                        <h1 className="text-5xl font-black italic uppercase tracking-tighter text-white">GRUPO <span className="text-emerald-500">SOITIC</span></h1>
+                        <p className="text-[10px] text-slate-500 font-bold uppercase tracking-[0.5em] mt-2">Ranking Março / 2026</p>
                     </header>
 
-                    {/* Dashboard Principal */}
-                    <div className="bg-card rounded-[3rem] p-8 md:p-12 shadow-2xl relative border border-white/5 overflow-hidden">
-                        {/* Indicador de Live */}
-                        <div className="absolute top-6 right-8 flex items-center gap-2">
-                            <span className="relative flex h-2 w-2">
-                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                            </span>
-                            <span className="text-[9px] font-black text-emerald-500 uppercase tracking-widest">Sincronizado</span>
-                        </div>
-
-                        {/* Pódio Visual */}
-                        <div className="flex items-end justify-center gap-4 h-52 mb-16 border-b border-slate-800/50 pb-8">
-                            {/* 2º Lugar */}
-                            <div className="flex flex-col items-center w-full max-w-[130px]">
-                                <span className="text-[10px] font-bold text-slate-400 mb-2 truncate w-full text-center uppercase tracking-tighter">{sorted[1]?.name}</span>
-                                <div className="w-full bg-slate-800/40 h-24 rounded-t-2xl flex flex-col items-center justify-center border-t border-white/5 relative group">
-                                    <span className="text-[10px] font-mono font-bold text-slate-300 group-hover:text-white transition-colors">
-                                        {formatCurrency(sorted[1]?.sales || 0)}
-                                    </span>
-                                    <div className="absolute -bottom-2 bg-slate-700 px-3 py-0.5 rounded-full text-[9px] font-black">2º</div>
+                    <div className="bg-card rounded-[3rem] p-10 shadow-2xl relative border border-white/5">
+                        {/* Pódio Centralizado */}
+                        <div className="flex items-end justify-center gap-4 h-44 mb-12 border-b border-slate-800/50 pb-8">
+                            <div className="flex flex-col items-center w-full max-w-[120px]">
+                                <span className="text-[10px] font-bold text-slate-400 mb-1 truncate text-center">{sorted[1]?.name}</span>
+                                <div className="w-full bg-slate-800 h-16 rounded-t-xl flex items-center justify-center font-mono text-[9px]">{formatCurrency(sorted[1]?.sales)}</div>
+                            </div>
+                            <div className="flex flex-col items-center w-full max-w-[140px]">
+                                <span className="text-xs font-black text-emerald-400 mb-1 truncate text-center uppercase">{sorted[0]?.name}</span>
+                                <div className="w-full bg-emerald-600 h-28 rounded-t-xl flex flex-col items-center justify-center shadow-lg border-t border-white/20">
+                                    <span className="text-3xl font-black italic text-white">1º</span>
+                                    <span className="text-[10px] font-bold text-white">{formatCurrency(sorted[0]?.sales)}</span>
                                 </div>
                             </div>
-
-                            {/* 1º Lugar */}
-                            <div className="flex flex-col items-center w-full max-w-[160px]">
-                                <span className="text-xs font-black text-emerald-400 mb-2 truncate w-full text-center uppercase tracking-widest">{sorted[0]?.name}</span>
-                                <div className="w-full bg-gradient-to-b from-emerald-500 to-emerald-700 h-40 rounded-t-3xl flex flex-col items-center justify-center shadow-[0_0_50px_rgba(16,185,129,0.25)] border-t border-white/30 relative">
-                                    <span className="text-5xl font-black italic text-white drop-shadow-lg">1º</span>
-                                    <span className="text-[11px] font-black text-white/90 px-2 text-center mt-1">
-                                        {formatCurrency(sorted[0]?.sales || 0)}
-                                    </span>
-                                    <div className="absolute -top-4 text-2xl">👑</div>
-                                </div>
-                            </div>
-
-                            {/* 3º Lugar */}
-                            <div className="flex flex-col items-center w-full max-w-[130px]">
-                                <span className="text-[10px] font-bold text-slate-500 mb-2 truncate w-full text-center uppercase tracking-tighter">{sorted[2]?.name}</span>
-                                <div className="w-full bg-slate-800/20 h-16 rounded-t-2xl flex flex-col items-center justify-center border-t border-white/5 relative">
-                                    <span className="text-[9px] font-mono font-bold text-slate-500">
-                                        {formatCurrency(sorted[2]?.sales || 0)}
-                                    </span>
-                                    <div className="absolute -bottom-2 bg-slate-900 px-3 py-0.5 rounded-full text-[9px] font-black text-slate-600">3º</div>
-                                </div>
+                            <div className="flex flex-col items-center w-full max-w-[120px]">
+                                <span className="text-[10px] font-bold text-slate-500 mb-1 truncate text-center">{sorted[2]?.name}</span>
+                                <div className="w-full bg-slate-800/40 h-10 rounded-t-xl flex items-center justify-center font-mono text-[8px] opacity-40">{formatCurrency(sorted[2]?.sales)}</div>
                             </div>
                         </div>
 
-                        {/* Listagem com Barras de Meta */}
+                        {/* Barras de Desempenho */}
                         <div className="grid gap-8">
                             {sellers.map(s => {
                                 const progress = Math.min((s.sales / s.target) * 100, 100);
-                                const isGoalHit = progress >= 100;
                                 return (
-                                    <div key={s.id} className="group">
-                                        <div className="flex justify-between items-end mb-3 px-1">
-                                            <div className="space-y-1">
-                                                <h3 className="text-base font-black uppercase text-white tracking-tight group-hover:text-emerald-400 transition-colors">{s.name}</h3>
-                                                <div className="flex items-center gap-3">
-                                                    <span className="text-[9px] text-slate-500 font-black uppercase bg-white/5 px-2 py-0.5 rounded-md">Meta {formatCurrency(s.target)}</span>
-                                                    {isGoalHit && <span className="text-[9px] font-black text-amber-500 uppercase animate-bounce">🏆 Meta Batida!</span>}
-                                                </div>
+                                    <div key={s.name} className="space-y-2">
+                                        <div className="flex justify-between items-end px-1">
+                                            <div>
+                                                <span className="text-sm font-black uppercase text-white">{s.name}</span>
+                                                <span className="text-[9px] text-slate-500 font-bold block uppercase mt-0.5">Meta: {formatCurrency(s.target)}</span>
                                             </div>
                                             <div className="text-right">
-                                                <div className="text-sm font-mono font-black text-emerald-400">
-                                                    {formatCurrency(s.sales)}
-                                                </div>
-                                                <div className={`text-[11px] font-black ${isGoalHit ? 'text-amber-500' : 'text-slate-500'}`}>
-                                                    {Math.round(progress)}%
-                                                </div>
+                                                <span className="text-xs font-mono font-bold text-emerald-400">{formatCurrency(s.sales)}</span>
+                                                <span className={`text-[10px] font-black ml-3 ${progress >= 100 ? 'text-amber-500' : 'text-slate-500'}`}>{Math.round(progress)}%</span>
                                             </div>
                                         </div>
-                                        <div className="h-3 w-full bg-slate-900/50 rounded-full overflow-hidden p-[2px] border border-white/5">
+                                        <div className="h-2.5 w-full bg-slate-900 rounded-full overflow-hidden p-[1px] border border-white/5">
                                             <div 
-                                                className={`h-full rounded-full bar-transition ${isGoalHit ? 'bg-gradient-to-r from-yellow-500 via-amber-400 to-yellow-500 shadow-[0_0_20px_rgba(245,158,11,0.4)]' : 'bg-gradient-to-r from-emerald-600 to-emerald-400'}`}
+                                                className={`h-full rounded-full bar-transition ${progress >= 100 ? 'bg-gradient-to-r from-amber-600 to-yellow-400' : 'bg-emerald-500'}`}
                                                 style={{ width: `${progress}%` }}
                                             ></div>
                                         </div>
@@ -172,12 +143,6 @@
                             })}
                         </div>
                     </div>
-
-                    <footer className="text-center">
-                        <p className="text-[9px] font-black text-slate-700 uppercase tracking-[0.3em] animate-pulse-soft">
-                            Atualização Automática via Google Sheets • Grupo Soitic © 2026
-                        </p>
-                    </footer>
                 </div>
             );
         }
