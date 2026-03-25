@@ -2,107 +2,43 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ranking Comercial - Grupo Soitic</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Inter', sans-serif; background-color: #09090b; }
-        .bg-card { background-color: #18181b; border: 1px solid #27272a; }
-        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-        .bar-transition { transition: width 1s cubic-bezier(0.4, 0, 0.2, 1); }
-        .input-currency-container { position: relative; display: flex; align-items: center; }
-        .currency-symbol { position: absolute; left: 12px; font-weight: 800; font-size: 0.7rem; opacity: 0.5; pointer-events: none; }
-    </style>
+    <style>body { background-color: #09090b; color: white; }</style>
 </head>
-<body class="text-slate-100 pb-20">
+<body>
     <div id="root"></div>
-
     <script type="text/babel">
-        const { useState, useMemo, useEffect } = React;
-
-        const TrophyIcon = () => (
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
-        );
-
-        const formatCurrency = (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v || 0);
+        const { useState } = React;
 
         function App() {
-            // SEGURANÇA CONTRA TELA PRETA: Try/Catch no carregamento
-            const [sellers, setSellers] = useState(() => {
-                try {
-                    const saved = localStorage.getItem('soitic_v13_sellers');
-                    return saved ? JSON.parse(saved) : [
-                        { id: 1, name: 'Guilherme', sales: 0, contracts: 0, target: 6000, company: 'MEDSYSTEM' },
-                        { id: 2, name: 'Vanessa', sales: 0, contracts: 0, target: 6000, company: 'ECOS' },
-                        { id: 3, name: 'Luiz', sales: 0, contracts: 0, target: 3000, company: 'MEDSYSTEM' },
-                        { id: 4, name: 'João', sales: 0, contracts: 0, target: 3000, company: 'ECOS' }
-                    ];
-                } catch(e) { return []; }
-            });
+            // Versão simplificada para teste de carga
+            const [sellers, setSellers] = useState([
+                { id: 1, name: 'Guilherme', sales: 0, company: 'MEDSYSTEM' },
+                { id: 2, name: 'Vanessa', sales: 0, company: 'ECOS' },
+                { id: 3, name: 'Luiz', sales: 0, company: 'MEDSYSTEM' },
+                { id: 4, name: 'João', sales: 0, company: 'ECOS' }
+            ]);
 
-            const [companies, setCompanies] = useState(() => {
-                try {
-                    const saved = localStorage.getItem('soitic_v13_companies');
-                    return saved ? JSON.parse(saved) : [
-                        { id: 'med', name: 'MEDSYSTEM', best26: 0, worst26: 0, same25: 0 },
-                        { id: 'ecos', name: 'ECOS', best26: 0, worst26: 0, same25: 0 }
-                    ];
-                } catch(e) { return []; }
-            });
-
-            useEffect(() => {
-                localStorage.setItem('soitic_v13_sellers', JSON.stringify(sellers));
-                localStorage.setItem('soitic_v13_companies', JSON.stringify(companies));
-            }, [sellers, companies]);
-
-            const companyTotals = useMemo(() => {
-                return sellers.reduce((acc, s) => {
-                    if (!acc[s.company]) acc[s.company] = { sales: 0, contracts: 0 };
-                    acc[s.company].sales += s.sales;
-                    acc[s.company].contracts += s.contracts;
-                    return acc;
-                }, {});
-            }, [sellers]);
-
-            const handleUpdateSeller = (id, field, value) => {
-                const val = parseFloat(value) || 0;
-                setSellers(prev => prev.map(s => {
-                    if (s.id === id) {
-                        if (field === 'sales' && val >= s.target && s.sales < s.target) {
-                            confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: ['#fbbf24', '#10b981', '#ffffff'] });
-                        }
-                        return { ...s, [field]: val };
-                    }
-                    return s;
-                }));
-            };
-
-            const handleUpdateCompany = (id, field, value) => {
-                const val = parseFloat(value) || 0;
-                setCompanies(prev => prev.map(c => c.id === id ? { ...c, [field]: val } : c));
-            };
-
-            const resetAll = () => {
-                if(confirm("Zerar todos os dados do Grupo Soitic?")) {
-                    setSellers(sellers.map(s => ({ ...s, sales: 0, contracts: 0 })));
-                    setCompanies(companies.map(c => ({ ...c, best26: 0, worst26: 0, same25: 0 })));
-                }
-            };
-
-            const sortedSales = useMemo(() => [...sellers].sort((a, b) => b.sales - a.sales), [sellers]);
-            const sortedContracts = useMemo(() => [...sellers].sort((a, b) => b.contracts - a.contracts), [sellers]);
-
-            const Podium = ({ title, data, field, accentColor, symbol }) => (
-                <div className="bg-card rounded-2xl p-6 shadow-xl flex flex-col border border-[#27272a]">
-                    <div className="flex items-center gap-2 mb-8 text-slate-400">
-                        <div className={`p-2 rounded-xl ${accentColor} bg-opacity-20`}><TrophyIcon /></div>
-                        <h3 className="font-bold text-sm uppercase tracking-widest">{title}</h3>
+            return (
+                <div className="p-10">
+                    <h1 className="text-2xl font-bold mb-4">Teste de Conexão - Grupo Soitic</h1>
+                    <div className="space-y-4">
+                        {sellers.map(s => (
+                            <div key={s.id} className="p-4 bg-zinc-900 border border-zinc-800 rounded-xl">
+                                {s.name} - {s.company}
+                            </div>
+                        ))}
                     </div>
-                    <div className="flex items-end justify-center gap-3 h-36 mt-auto">
-                        <div className="flex flex-col items-center w-full">
-                            <span className="text-[10px] font-bold text-slate-500 mb-1 truncate w-full text-center">{data[1]?.name || '---'}</span>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
