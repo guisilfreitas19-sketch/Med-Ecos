@@ -3,38 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Monitor Financeiro TV - Med e Ecos</title>
+    <title>Monitor Financeiro TV - Ecos & Med</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-200 min-h-screen p-4 italic">
 
     <div class="max-w-full mx-auto grid grid-cols-1 lg:grid-cols-2 gap-6">
         
-        <div class="bg-white rounded-3xl shadow-xl border-t-8 border-indigo-600 p-6 space-y-6">
-            <h2 class="text-2xl font-black text-center uppercase tracking-tighter text-indigo-900">Medsystem</h2>
-            
-            <div class="grid grid-cols-2 gap-4">
-                <div class="col-span-2">
-                    <label class="text-[10px] font-bold uppercase text-gray-400">Faturamento Atual</label>
-                    <input type="text" id="med-atual" oninput="mascara(this, 'med', 'atual')" class="w-full p-4 bg-indigo-50 border-2 border-indigo-100 rounded-2xl text-2xl font-black text-center text-indigo-700 outline-none" placeholder="R$ 0,00">
-                </div>
-                <div>
-                    <label class="text-[10px] font-bold uppercase text-gray-400">Março / 2025</label>
-                    <input type="text" id="med-ref2025" oninput="mascara(this, 'med', 'ref2025')" class="w-full p-2 bg-gray-50 border rounded-xl text-center font-bold" placeholder="R$ 0,00">
-                </div>
-                <div>
-                    <label class="text-[10px] font-bold uppercase text-gray-400">Pior Mês 2026</label>
-                    <input type="text" id="med-pior2026" oninput="mascara(this, 'med', 'pior2026')" class="w-full p-2 bg-gray-50 border rounded-xl text-center font-bold" placeholder="R$ 0,00">
-                </div>
-                <div class="col-span-2">
-                    <label class="text-[10px] font-bold uppercase text-gray-400 text-center block">Recorde (Melhor 2026)</label>
-                    <input type="text" id="med-melhor2026" oninput="mascara(this, 'med', 'melhor2026')" class="w-full p-2 bg-gray-50 border rounded-xl text-center font-bold" placeholder="R$ 0,00">
-                </div>
-            </div>
-
-            <div id="res-med" class="space-y-3"></div>
-        </div>
-
         <div class="bg-white rounded-3xl shadow-xl border-t-8 border-emerald-600 p-6 space-y-6">
             <h2 class="text-2xl font-black text-center uppercase tracking-tighter text-emerald-900">Ecos</h2>
             
@@ -60,10 +35,35 @@
             <div id="res-ecos" class="space-y-3"></div>
         </div>
 
+        <div class="bg-white rounded-3xl shadow-xl border-t-8 border-indigo-600 p-6 space-y-6">
+            <h2 class="text-2xl font-black text-center uppercase tracking-tighter text-indigo-900">Medsystem</h2>
+            
+            <div class="grid grid-cols-2 gap-4">
+                <div class="col-span-2">
+                    <label class="text-[10px] font-bold uppercase text-gray-400">Faturamento Atual</label>
+                    <input type="text" id="med-atual" oninput="mascara(this, 'med', 'atual')" class="w-full p-4 bg-indigo-50 border-2 border-indigo-100 rounded-2xl text-2xl font-black text-center text-indigo-700 outline-none" placeholder="R$ 0,00">
+                </div>
+                <div>
+                    <label class="text-[10px] font-bold uppercase text-gray-400">Março / 2025</label>
+                    <input type="text" id="med-ref2025" oninput="mascara(this, 'med', 'ref2025')" class="w-full p-2 bg-gray-50 border rounded-xl text-center font-bold" placeholder="R$ 0,00">
+                </div>
+                <div>
+                    <label class="text-[10px] font-bold uppercase text-gray-400">Pior Mês 2026</label>
+                    <input type="text" id="med-pior2026" oninput="mascara(this, 'med', 'pior2026')" class="w-full p-2 bg-gray-50 border rounded-xl text-center font-bold" placeholder="R$ 0,00">
+                </div>
+                <div class="col-span-2">
+                    <label class="text-[10px] font-bold uppercase text-gray-400 text-center block">Recorde (Melhor 2026)</label>
+                    <input type="text" id="med-melhor2026" oninput="mascara(this, 'med', 'melhor2026')" class="w-full p-2 bg-gray-50 border rounded-xl text-center font-bold" placeholder="R$ 0,00">
+                </div>
+            </div>
+
+            <div id="res-med" class="space-y-3"></div>
+        </div>
+
     </div>
 
     <script>
-        const storeKey = 'dash_tv_v6';
+        const storeKey = 'dash_tv_v7';
         let dados = JSON.parse(localStorage.getItem(storeKey)) || {
             med: { atual: 0, ref2025: 0, pior2026: 0, melhor2026: 0 },
             ecos: { atual: 0, ref2025: 0, pior2026: 0, melhor2026: 0 }
@@ -79,6 +79,7 @@
             v = v.replace(/(\d)(\d{3}),/g, "$1.$2,");
             i.value = v !== '0,00' ? 'R$ ' + v : '';
             
+            // Tratamento rigoroso do número para cálculo
             dados[emp][campo] = parseFloat(v.replace(/\./g, '').replace(',', '.')) || 0;
             localStorage.setItem(storeKey, JSON.stringify(dados));
             calcular(emp);
@@ -88,14 +89,16 @@
             if (!base || !atual) return '';
             const diff = atual - base;
             const perc = (atual / base) * 100;
-            const cor = diff >= 0 ? 'border-green-500 bg-green-50 text-green-700' : 'border-red-500 bg-red-50 text-red-700';
+            
+            // Define cores baseadas na performance
+            const corStatus = diff >= 0 ? 'border-green-500 bg-green-50 text-green-700' : 'border-red-500 bg-red-50 text-red-700';
             
             return `
-                <div class="p-4 border-l-8 rounded-2xl shadow-sm ${cor}">
+                <div class="p-4 border-l-8 rounded-2xl shadow-sm ${corStatus}">
                     <p class="text-[11px] font-bold uppercase opacity-80">${titulo}: ${formatar(base)}</p>
                     <div class="flex justify-between items-center font-black mt-1">
-                        <span class="text-base">DIFERENÇA: ${diff >= 0 ? '+' : ''}${formatar(diff)}</span>
-                        <span class="text-base">ATINGIDO: ${perc.toFixed(2)}%</span>
+                        <span class="text-base leading-tight">➡️ Diferença: <br>${diff >= 0 ? '+' : ''}${formatar(diff)}</span>
+                        <span class="text-base text-right leading-tight">➡️ Atingido: <br>${perc.toFixed(2)}%</span>
                     </div>
                 </div>
             `;
@@ -104,9 +107,9 @@
         function calcular(emp) {
             const d = dados[emp];
             let html = "";
-            html += criarCard("📈 Março / 2025", d.ref2025, d.atual);
-            html += criarCard("➡️ Pior Mês 2026", d.pior2026, d.atual);
-            html += criarCard("🏆 Recorde 2026", d.melhor2026, d.atual);
+            html += criarCard("📈 COMPARATIVO Março/2025", d.ref2025, d.atual);
+            html += criarCard("📉 Pior Mês 2026", d.pior2026, d.atual);
+            html += criarCard("🏆 Melhor Mês 2026", d.melhor2026, d.atual);
             document.getElementById(`res-${emp}`).innerHTML = html;
         }
 
