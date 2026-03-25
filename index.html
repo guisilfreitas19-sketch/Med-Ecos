@@ -1,174 +1,79 @@
-Entendido! Para visualização em uma TV, o melhor é um layout de **Grid (Grelha)**, onde as duas empresas ficam lado a lado. Removi as abas e coloquei a **MEDSYSTEM** e a **ECOS** ocupando a tela inteira simultaneamente.
-
-Também aumentei um pouco as fontes e os cards para que a leitura fique clara mesmo à distância.
-
-### Código para Visualização em TV (index.html)
-
-```html
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Monitoramento Financeiro TV</title>
+    <title>Monitor Financeiro Compacto</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        input::placeholder { color: #cbd5e1; }
-        .card-shadow { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
+        input::placeholder { color: #cbd5e1; font-weight: normal; }
+        .compact-input { @apply w-full p-2 bg-slate-50 border rounded-lg text-center font-bold text-sm outline-none focus:border-indigo-400; }
     </style>
 </head>
-<body class="bg-slate-200 min-h-screen p-4 lg:p-8">
+<body class="bg-slate-100 min-h-screen p-4">
 
-    <div class="max-w-[1600px] mx-auto">
-        <h1 class="text-3xl font-black text-slate-800 text-center mb-8 uppercase tracking-widest italic">Monitoramento de Performance 2026</h1>
-
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <div class="max-w-[1400px] mx-auto">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             
-            <div class="space-y-6">
-                <div class="bg-indigo-700 p-4 rounded-t-3xl shadow-lg">
-                    <h2 class="text-2xl font-black text-white text-center tracking-widest">MEDSYSTEM</h2>
-                </div>
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="bg-indigo-600 p-2 text-center text-white font-black text-sm tracking-widest uppercase">Medsystem</div>
                 
-                <div class="bg-white p-6 rounded-b-3xl card-shadow space-y-6">
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="col-span-2">
-                            <label class="block text-xs font-bold text-slate-500 uppercase text-center">Faturamento Mês Atual</label>
-                            <input type="text" id="med-atual" oninput="mascara(this, 'med', 'atual')" class="w-full mt-1 p-4 bg-slate-50 border-2 border-slate-200 rounded-2xl text-2xl font-black text-center text-indigo-600 outline-none focus:border-indigo-500" placeholder="R$ 0,00">
+                <div class="p-5 space-y-4">
+                    <div class="grid grid-cols-3 gap-3">
+                        <div class="col-span-3">
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Faturamento Atual</label>
+                            <input type="text" id="med-atual" oninput="mascara(this, 'med', 'atual')" class="w-full p-3 bg-slate-50 border-2 border-slate-100 rounded-xl text-xl font-black text-center text-indigo-600 outline-none focus:border-indigo-500" placeholder="R$ 0,00">
                         </div>
                         <div>
-                            <label class="block text-[10px] font-bold text-slate-400 uppercase text-center text-nowrap">Mês 2025</label>
-                            <input type="text" id="med-ref2025" oninput="mascara(this, 'med', 'ref2025')" class="w-full mt-1 p-2 bg-slate-50 border rounded-xl text-center font-bold" placeholder="R$ 0,00">
+                            <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Mês 2025</label>
+                            <input type="text" id="med-ref2025" oninput="mascara(this, 'med', 'ref2025')" class="compact-input" placeholder="R$ 0,00">
                         </div>
                         <div>
-                            <label class="block text-[10px] font-bold text-slate-400 uppercase text-center text-nowrap">Pior 2026</label>
-                            <input type="text" id="med-pior2026" oninput="mascara(this, 'med', 'pior2026')" class="w-full mt-1 p-2 bg-slate-50 border rounded-xl text-center font-bold" placeholder="R$ 0,00">
+                            <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Pior 2026</label>
+                            <input type="text" id="med-pior2026" oninput="mascara(this, 'med', 'pior2026')" class="compact-input" placeholder="R$ 0,00">
                         </div>
-                        <div class="col-span-2">
-                            <label class="block text-[10px] font-bold text-slate-400 uppercase text-center">Recorde (Melhor Mês)</label>
-                            <input type="text" id="med-melhor2026" oninput="mascara(this, 'med', 'melhor2026')" class="w-full mt-1 p-2 bg-slate-50 border rounded-xl text-center font-bold italic" placeholder="R$ 0,00">
+                        <div>
+                            <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Recorde</label>
+                            <input type="text" id="med-melhor2026" oninput="mascara(this, 'med', 'melhor2026')" class="compact-input border-amber-200" placeholder="R$ 0,00">
                         </div>
                     </div>
 
-                    <div id="res-med-2025" class="p-4 rounded-2xl border-l-8 border-slate-200 bg-slate-50 transition-all">
-                        <p id="txt-med-2025" class="text-xl font-black text-slate-300 italic text-center">---</p>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div id="res-med-2025" class="p-3 rounded-xl border-l-4 border-slate-200 bg-slate-50">
+                            <p class="text-[9px] font-bold text-slate-400 uppercase leading-none mb-1 text-nowrap">vs. Ano Anterior</p>
+                            <p id="txt-med-2025" class="text-sm font-black text-slate-400 uppercase">---</p>
+                        </div>
+                        <div id="res-med-pior" class="p-3 rounded-xl border-l-4 border-slate-200 bg-slate-50">
+                            <p class="text-[9px] font-bold text-slate-400 uppercase leading-none mb-1 text-nowrap">vs. Pior Mês</p>
+                            <p id="txt-med-pior" class="text-sm font-black text-slate-400 uppercase">---</p>
+                        </div>
                     </div>
 
-                    <div class="bg-slate-900 p-6 rounded-3xl text-white relative overflow-hidden">
-                        <p class="text-[10px] font-bold text-indigo-300 uppercase mb-2">Meta Recorde</p>
-                        <h2 id="txt-med-melhor" class="text-3xl font-black text-yellow-400 italic">---</h2>
-                        <div class="w-full bg-slate-700 rounded-full h-4 mt-4 overflow-hidden">
-                            <div id="bar-med" class="bg-yellow-400 h-full w-0 transition-all duration-1000"></div>
+                    <div class="bg-slate-900 p-4 rounded-xl text-white">
+                        <div class="flex justify-between items-end">
+                            <p class="text-[9px] font-bold text-indigo-300 uppercase leading-none">Rumo ao Recorde</p>
+                            <h2 id="txt-med-melhor" class="text-lg font-black text-yellow-400 leading-none">---</h2>
+                        </div>
+                        <div class="w-full bg-slate-700 rounded-full h-2 mt-3 overflow-hidden">
+                            <div id="bar-med" class="bg-yellow-400 h-full w-0 transition-all duration-700"></div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="space-y-6">
-                <div class="bg-emerald-600 p-4 rounded-t-3xl shadow-lg">
-                    <h2 class="text-2xl font-black text-white text-center tracking-widest">ECOS</h2>
-                </div>
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="bg-emerald-600 p-2 text-center text-white font-black text-sm tracking-widest uppercase">Ecos</div>
                 
-                <div class="bg-white p-6 rounded-b-3xl card-shadow space-y-6">
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="col-span-2">
-                            <label class="block text-xs font-bold text-slate-500 uppercase text-center">Faturamento Mês Atual</label>
-                            <input type="text" id="ecos-atual" oninput="mascara(this, 'ecos', 'atual')" class="w-full mt-1 p-4 bg-slate-50 border-2 border-slate-200 rounded-2xl text-2xl font-black text-center text-emerald-600 outline-none focus:border-emerald-500" placeholder="R$ 0,00">
+                <div class="p-5 space-y-4">
+                    <div class="grid grid-cols-3 gap-3">
+                        <div class="col-span-3">
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Faturamento Atual</label>
+                            <input type="text" id="ecos-atual" oninput="mascara(this, 'ecos', 'atual')" class="w-full p-3 bg-slate-50 border-2 border-slate-100 rounded-xl text-xl font-black text-center text-emerald-600 outline-none focus:border-emerald-500" placeholder="R$ 0,00">
                         </div>
                         <div>
-                            <label class="block text-[10px] font-bold text-slate-400 uppercase text-center text-nowrap">Mês 2025</label>
-                            <input type="text" id="ecos-ref2025" oninput="mascara(this, 'ecos', 'ref2025')" class="w-full mt-1 p-2 bg-slate-50 border rounded-xl text-center font-bold" placeholder="R$ 0,00">
+                            <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Mês 2025</label>
+                            <input type="text" id="ecos-ref2025" oninput="mascara(this, 'ecos', 'ref2025')" class="compact-input" placeholder="R$ 0,00">
                         </div>
                         <div>
-                            <label class="block text-[10px] font-bold text-slate-400 uppercase text-center text-nowrap">Pior 2026</label>
-                            <input type="text" id="ecos-pior2026" oninput="mascara(this, 'ecos', 'pior2026')" class="w-full mt-1 p-2 bg-slate-50 border rounded-xl text-center font-bold" placeholder="R$ 0,00">
-                        </div>
-                        <div class="col-span-2">
-                            <label class="block text-[10px] font-bold text-slate-400 uppercase text-center">Recorde (Melhor Mês)</label>
-                            <input type="text" id="ecos-melhor2026" oninput="mascara(this, 'ecos', 'melhor2026')" class="w-full mt-1 p-2 bg-slate-50 border rounded-xl text-center font-bold italic" placeholder="R$ 0,00">
-                        </div>
-                    </div>
-
-                    <div id="res-ecos-2025" class="p-4 rounded-2xl border-l-8 border-slate-200 bg-slate-50 transition-all">
-                        <p id="txt-ecos-2025" class="text-xl font-black text-slate-300 italic text-center">---</p>
-                    </div>
-
-                    <div class="bg-slate-900 p-6 rounded-3xl text-white relative overflow-hidden">
-                        <p class="text-[10px] font-bold text-emerald-300 uppercase mb-2">Meta Recorde</p>
-                        <h2 id="txt-ecos-melhor" class="text-3xl font-black text-yellow-400 italic">---</h2>
-                        <div class="w-full bg-slate-700 rounded-full h-4 mt-4 overflow-hidden">
-                            <div id="bar-ecos" class="bg-yellow-400 h-full w-0 transition-all duration-1000"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-        <p class="text-center text-[10px] text-slate-500 uppercase mt-8 font-bold">Dados salvos automaticamente neste navegador</p>
-    </div>
-
-    <script>
-        let dados = JSON.parse(localStorage.getItem('dash_tv_v1')) || {
-            med: { atual: 0, ref2025: 0, pior2026: 0, melhor2026: 0 },
-            ecos: { atual: 0, ref2025: 0, pior2026: 0, melhor2026: 0 }
-        };
-
-        function formatar(v) { return v.toLocaleString('pt-br', { style: 'currency', currency: 'BRL' }); }
-
-        function mascara(i, emp, campo) {
-            let v = i.value.replace(/\D/g,'');
-            v = (v/100).toFixed(2) + '';
-            v = v.replace(".", ",");
-            v = v.replace(/(\d)(\d{3})(\d{3}),/g, "$1.$2.$3,");
-            v = v.replace(/(\d)(\d{3}),/g, "$1.$2,");
-            i.value = v !== '0,00' ? 'R$ ' + v : '';
-            
-            dados[emp][campo] = parseFloat(v.replace(/\./g, '').replace(',', '.'));
-            localStorage.setItem('dash_tv_v1', JSON.stringify(dados));
-            calcular(emp);
-        }
-
-        function calcular(emp) {
-            const a = dados[emp].atual || 0;
-            const r = dados[emp].ref2025 || 0;
-            const m = dados[emp].melhor2026 || 0;
-
-            const card = document.getElementById(`res-${emp}-2025`);
-            const txt = document.getElementById(`txt-${emp}-2025`);
-
-            if(a > 0 && r > 0) {
-                const d = a - r;
-                card.className = `p-4 rounded-2xl border-l-8 shadow-inner ${d >= 0 ? 'border-green-500 bg-green-50' : 'border-red-500 bg-red-50'}`;
-                txt.innerText = `${d >= 0 ? '+ ' : '- '}${formatar(Math.abs(d))} ${d >= 0 ? 'ACIMA' : 'ABAIXO'}`;
-                txt.className = `text-xl font-black ${d >= 0 ? 'text-green-600' : 'text-red-600'}`;
-            }
-
-            if(a > 0 && m > 0) {
-                const f = m - a;
-                const p = Math.min((a/m)*100, 100);
-                document.getElementById(`bar-${emp}`).style.width = p + '%';
-                document.getElementById(`txt-${emp}-melhor`).innerText = f > 0 ? `FALTAM: ${formatar(f)}` : "🚀 NOVO RECORDE!";
-            }
-        }
-
-        // Carregar dados salvos ao abrir
-        window.onload = () => {
-            ['med', 'ecos'].forEach(emp => {
-                ['atual', 'ref2025', 'pior2026', 'melhor2026'].forEach(f => {
-                    const val = dados[emp][f];
-                    if(val > 0) document.getElementById(`${emp}-${f}`).value = formatar(val);
-                });
-                calcular(emp);
-            });
-        };
-    </script>
-</body>
-</html>
-```
-
-### O que mudou para a TV:
-1.  **Layout Lado a Lado:** No computador ou TV (telas largas), as duas empresas aparecem juntas. No celular, elas se empilham automaticamente.
-2.  **Foco nos Resultados:** Coloquei o faturamento atual bem grande no centro de cada card.
-3.  **Cores Fortes:** Usei Indigo para Medsystem e Esmeralda para Ecos, facilitando a identificação de longe.
-4.  **Sincronização:** Você pode digitar na Ecos sem que a Medsystem suma da tela.
-
-**Gostaria que eu colocasse um relógio digital grande no topo para ajudar no controle do tempo durante o dia?**
+                            <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Pior 2026</label>
+                            <input type="text" id="ecos-pior2026" oninput="mascara(this, 'ecos', 'pior2026')" class="compact-input"
