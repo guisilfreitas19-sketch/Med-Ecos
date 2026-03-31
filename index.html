@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Monitor de Metas & Recordes | SOITIC</title>
+    <title>Monitor de Metas & Recordes V1.1 | SOITIC</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,800;1,800&display=swap');
         body { font-family: 'Plus Jakarta Sans', sans-serif; overflow: hidden; }
-        .glass-card { background: #ffffff; height: 86vh; box-shadow: 0 20px 50px rgba(0,0,0,0.3); }
+        .glass-card { background: #ffffff; height: 84vh; box-shadow: 0 20px 50px rgba(0,0,0,0.3); }
         .status-card { transition: all 0.3s ease; border: 1px solid #f1f5f9; }
         .bg-main { background: radial-gradient(circle at top right, #1e293b, #0f172a); }
         .title-glow { text-shadow: 0 0 20px rgba(52, 211, 153, 0.3); }
@@ -25,7 +25,7 @@
         </p>
     </div>
 
-    <div class="max-w-full mx-auto grid grid-cols-2 gap-6">
+    <div class="max-w-full mx-auto grid grid-cols-2 gap-6 relative">
         
         <div class="glass-card rounded-[3rem] p-6 flex flex-col border-b-[12px] border-emerald-500">
             <h2 class="text-3xl font-[900] text-emerald-600 mb-4 tracking-tighter text-center uppercase">Ecos</h2>
@@ -76,14 +76,17 @@
                 <div id="res-med" class="space-y-3 pt-2"></div>
             </div>
         </div>
+    </div>
 
+    <div class="fixed bottom-2 right-4 flex items-center gap-2">
+        <span class="text-[9px] font-black text-white/20 uppercase tracking-[0.2em]">Monitor de Metas & Recordes</span>
+        <span class="bg-emerald-500/20 text-emerald-400 text-[10px] px-2 py-0.5 rounded-md font-bold border border-emerald-500/30">V1.1</span>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
 
     <script>
-        // Configurações do seu projeto
         const firebaseConfig = {
             apiKey: "AIzaSyAbIBmJwJDWslFiJ9TazuLVHXM4yZTBDSs",
             authDomain: "dashboard-financeiro-cec1f.firebaseapp.com",
@@ -94,7 +97,6 @@
             appId: "1:642067118768:web:26307698c71a113099d975"
         };
 
-        // Inicialização
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
@@ -103,7 +105,6 @@
             ecos: { atual: 0, ref2025: 0, pior2026: 0, melhor2026: 0 }
         };
 
-        // Escuta mudanças em tempo real
         db.ref('dashboard_data').on('value', (snapshot) => {
             const val = snapshot.val();
             if (val) {
@@ -124,7 +125,6 @@
             i.value = v !== '0,00' ? 'R$ ' + v : '';
             
             const num = parseFloat(v.replace(/\./g, '').replace(',', '.')) || 0;
-            // Salva no Firebase
             db.ref(`dashboard_data/${emp}/${campo}`).set(num);
         }
 
@@ -132,8 +132,9 @@
             ['med', 'ecos'].forEach(emp => {
                 ['atual', 'ref2025', 'pior2026', 'melhor2026'].forEach(f => {
                     const el = document.getElementById(`${emp}-${f}`);
-                    if (document.activeElement !== el) {
-                        el.value = (dados[emp] && dados[emp][f] > 0) ? formatar(dados[emp][f]) : '';
+                    if (el && document.activeElement !== el) {
+                        const valor = (dados[emp] && dados[emp][f]) ? dados[emp][f] : 0;
+                        el.value = valor > 0 ? formatar(valor) : '';
                     }
                 });
             });
