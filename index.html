@@ -3,16 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Monitor de Metas & Recordes V1.5 | SOITIC</title>
+    <title>Monitor de Metas & Recordes V1.6 | SOITIC</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,800;1,800&display=swap');
         body { font-family: 'Plus Jakarta Sans', sans-serif; overflow: hidden; }
-        .glass-card { background: #ffffff; height: 82vh; box-shadow: 0 20px 50px rgba(0,0,0,0.4); }
+        .glass-card { background: #ffffff; height: 85vh; box-shadow: 0 20px 50px rgba(0,0,0,0.4); }
         .bg-main { background: radial-gradient(circle at top right, #1e293b, #0f172a); }
         .title-glow { text-shadow: 0 0 20px rgba(52, 211, 153, 0.3); }
         .version-badge { background: linear-gradient(90deg, #10b981, #3b82f6); }
-        .res-card { transition: all 0.4s ease; border: 1px solid #f1f5f9; }
+        /* Ajuste de espaçamento para os cards não encostarem */
+        .res-card { transition: all 0.4s ease; border: 1px solid #f1f5f9; margin-bottom: 0.5rem; }
     </style>
 </head>
 <body class="bg-main p-4 italic text-slate-800">
@@ -24,61 +25,61 @@
         <div class="flex justify-center items-center gap-3 mt-2">
             <div class="h-[1px] w-12 bg-white/10"></div>
             <span class="version-badge text-white text-[11px] px-3 py-0.5 rounded-full font-black tracking-widest uppercase shadow-lg">
-                Sincronizado V1.5
+                Sincronizado V1.6
             </span>
             <div class="h-[1px] w-12 bg-white/10"></div>
         </div>
     </div>
 
-    <div class="max-w-full mx-auto grid grid-cols-2 gap-6 relative">
+    <div class="max-w-full mx-auto grid grid-cols-2 gap-8 relative">
         
         <div class="glass-card rounded-[3rem] p-6 flex flex-col border-b-[12px] border-emerald-500">
             <h2 class="text-3xl font-[900] text-emerald-600 mb-4 tracking-tighter text-center uppercase">Ecos</h2>
-            <div class="space-y-4 flex-grow">
+            <div class="space-y-6 flex-grow">
                 <div class="bg-emerald-50/50 p-4 rounded-3xl border-2 border-emerald-100 shadow-inner">
                     <label class="text-[10px] font-black text-emerald-400 uppercase tracking-[0.2em] block mb-1 text-center font-sans italic">Faturamento Atual</label>
-                    <input type="text" id="ecos-atual" oninput="mascara(this, 'ecos', 'atual')" class="w-full bg-transparent p-1 rounded-xl text-5xl font-[900] text-emerald-700 outline-none text-center" placeholder="R$ 0,00">
+                    <input type="text" id="ecos-atual" oninput="aplicarMascara(this, 'ecos', 'atual')" class="w-full bg-transparent p-1 rounded-xl text-5xl font-[900] text-emerald-700 outline-none text-center" placeholder="R$ 0,00">
                 </div>
                 <div class="grid grid-cols-3 gap-3">
                     <div class="bg-slate-50 p-2 rounded-2xl border border-slate-100 text-center">
                         <label class="text-[8px] font-extrabold text-slate-400 uppercase block mb-1 italic">Mês Ref. 2025</label>
-                        <input type="text" id="ecos-ref2025" oninput="mascara(this, 'ecos', 'ref2025')" class="w-full text-center font-black text-xs bg-transparent outline-none text-slate-600" placeholder="R$ 0,00">
+                        <input type="text" id="ecos-ref2025" oninput="aplicarMascara(this, 'ecos', 'ref2025')" class="w-full text-center font-black text-xs bg-transparent outline-none text-slate-600" placeholder="R$ 0,00">
                     </div>
                     <div class="bg-slate-50 p-2 rounded-2xl border border-slate-100 text-center">
                         <label class="text-[8px] font-extrabold text-rose-500 uppercase block mb-1 italic">Pior Mês 2026</label>
-                        <input type="text" id="ecos-pior2026" oninput="mascara(this, 'ecos', 'pior2026')" class="w-full text-center font-black text-xs bg-transparent outline-none text-rose-500" placeholder="R$ 0,00">
+                        <input type="text" id="ecos-pior2026" oninput="aplicarMascara(this, 'ecos', 'pior2026')" class="w-full text-center font-black text-xs bg-transparent outline-none text-rose-500" placeholder="R$ 0,00">
                     </div>
                     <div class="bg-slate-50 p-2 rounded-2xl border border-slate-100 text-center">
                         <label class="text-[8px] font-extrabold text-emerald-500 uppercase block mb-1 italic">Melhor Mês 2026</label>
-                        <input type="text" id="ecos-melhor2026" oninput="mascara(this, 'ecos', 'melhor2026')" class="w-full text-center font-black text-xs bg-transparent outline-none text-emerald-500" placeholder="R$ 0,00">
+                        <input type="text" id="ecos-melhor2026" oninput="aplicarMascara(this, 'ecos', 'melhor2026')" class="w-full text-center font-black text-xs bg-transparent outline-none text-emerald-500" placeholder="R$ 0,00">
                     </div>
                 </div>
-                <div id="res-ecos" class="space-y-3 pt-2"></div>
+                <div id="res-ecos" class="space-y-4 pt-2"></div>
             </div>
         </div>
 
         <div class="glass-card rounded-[3rem] p-6 flex flex-col border-b-[12px] border-indigo-500">
             <h2 class="text-3xl font-[900] text-indigo-600 mb-4 tracking-tighter text-center uppercase">Medsystem</h2>
-            <div class="space-y-4 flex-grow">
+            <div class="space-y-6 flex-grow">
                 <div class="bg-indigo-50/50 p-4 rounded-3xl border-2 border-indigo-100 shadow-inner">
                     <label class="text-[10px] font-black text-indigo-400 uppercase tracking-[0.2em] block mb-1 text-center font-sans italic">Faturamento Atual</label>
-                    <input type="text" id="med-atual" oninput="mascara(this, 'med', 'atual')" class="w-full bg-transparent p-1 rounded-xl text-5xl font-[900] text-indigo-700 outline-none text-center" placeholder="R$ 0,00">
+                    <input type="text" id="med-atual" oninput="aplicarMascara(this, 'med', 'atual')" class="w-full bg-transparent p-1 rounded-xl text-5xl font-[900] text-indigo-700 outline-none text-center" placeholder="R$ 0,00">
                 </div>
                 <div class="grid grid-cols-3 gap-3">
                     <div class="bg-slate-50 p-2 rounded-2xl border border-slate-100 text-center">
                         <label class="text-[8px] font-extrabold text-slate-400 uppercase block mb-1 italic">Mês Ref. 2025</label>
-                        <input type="text" id="med-ref2025" oninput="mascara(this, 'med', 'ref2025')" class="w-full text-center font-black text-xs bg-transparent outline-none text-slate-600" placeholder="R$ 0,00">
+                        <input type="text" id="med-ref2025" oninput="aplicarMascara(this, 'med', 'ref2025')" class="w-full text-center font-black text-xs bg-transparent outline-none text-slate-600" placeholder="R$ 0,00">
                     </div>
                     <div class="bg-slate-50 p-2 rounded-2xl border border-slate-100 text-center">
                         <label class="text-[8px] font-extrabold text-rose-500 uppercase block mb-1 italic">Pior Mês 2026</label>
-                        <input type="text" id="med-pior2026" oninput="mascara(this, 'med', 'pior2026')" class="w-full text-center font-black text-xs bg-transparent outline-none text-rose-500" placeholder="R$ 0,00">
+                        <input type="text" id="med-pior2026" oninput="aplicarMascara(this, 'med', 'pior2026')" class="w-full text-center font-black text-xs bg-transparent outline-none text-rose-500" placeholder="R$ 0,00">
                     </div>
                     <div class="bg-slate-50 p-2 rounded-2xl border border-slate-100 text-center">
                         <label class="text-[8px] font-extrabold text-emerald-500 uppercase block mb-1 italic">Melhor Mês 2026</label>
-                        <input type="text" id="med-melhor2026" oninput="mascara(this, 'med', 'melhor2026')" class="w-full text-center font-black text-xs bg-transparent outline-none text-emerald-500" placeholder="R$ 0,00">
+                        <input type="text" id="med-melhor2026" oninput="aplicarMascara(this, 'med', 'melhor2026')" class="w-full text-center font-black text-xs bg-transparent outline-none text-emerald-500" placeholder="R$ 0,00">
                     </div>
                 </div>
-                <div id="res-med" class="space-y-3 pt-2"></div>
+                <div id="res-med" class="space-y-4 pt-2"></div>
             </div>
         </div>
     </div>
@@ -106,12 +107,19 @@
             if(v) { dados = v; atualizarTela(); }
         });
 
-        function formatar(v) { return v.toLocaleString('pt-br', { style: 'currency', currency: 'BRL' }); }
+        function formatarMoeda(v) { 
+            return v.toLocaleString('pt-br', { style: 'currency', currency: 'BRL' }); 
+        }
 
-        function mascara(i, emp, campo) {
-            let v = i.value.replace(/\D/g,'');
+        // Máscara aprimorada para garantir o formato R$ 0,00 em tempo real
+        function aplicarMascara(input, emp, campo) {
+            let v = input.value.replace(/\D/g,'');
             v = (v/100).toFixed(2);
-            const num = parseFloat(v) || 0;
+            if (isNaN(v)) v = "0.00";
+            
+            const num = parseFloat(v);
+            input.value = formatarMoeda(num);
+            
             db.ref(`dashboard_data/${emp}/${campo}`).set(num);
         }
 
@@ -121,7 +129,7 @@
                     const el = document.getElementById(`${emp}-${f}`);
                     if (el && document.activeElement !== el) {
                         const valor = (dados[emp] && dados[emp][f]) ? dados[emp][f] : 0;
-                        el.value = valor > 0 ? formatar(valor) : '';
+                        el.value = valor > 0 ? formatarMoeda(valor) : '';
                     }
                 });
                 calcular(emp);
@@ -137,15 +145,15 @@
             const corTexto = isPos ? 'text-emerald-600' : 'text-rose-600';
             
             return `
-                <div class="res-card p-5 rounded-[2.5rem] border-2 ${corStatus} shadow-sm relative overflow-hidden flex flex-col justify-center">
+                <div class="res-card p-4 rounded-[2rem] border-2 ${corStatus} shadow-sm relative overflow-hidden flex flex-col justify-center h-24">
                     <div class="flex justify-between items-center mb-1 relative z-10">
-                        <span class="text-[11px] font-[800] text-slate-400 uppercase tracking-widest">${icone} ${titulo}</span>
-                        <span class="text-base font-black ${corTexto}">${((atual/base)*100).toFixed(1)}%</span>
+                        <span class="text-[10px] font-[800] text-slate-400 uppercase tracking-widest">${icone} ${titulo}</span>
+                        <span class="text-sm font-black ${corTexto}">${((atual/base)*100).toFixed(1)}%</span>
                     </div>
                     <div class="flex justify-between items-center relative z-10">
-                        <p class="text-4xl font-[900] ${corTexto} tracking-tighter">${formatar(Math.abs(diff))}</p>
+                        <p class="text-3xl font-[900] ${corTexto} tracking-tighter">${formatarMoeda(Math.abs(diff))}</p>
                         <div class="text-right">
-                            <p class="text-[11px] font-black text-slate-400 uppercase tracking-tighter opacity-70">${isPos ? 'SUPEROU' : 'FALTAM'}</p>
+                            <p class="text-[10px] font-black text-slate-400 uppercase tracking-tighter opacity-70">${isPos ? 'SUPEROU' : 'FALTAM'}</p>
                         </div>
                     </div>
                     <div class="absolute bottom-0 left-0 h-1.5 bg-white/50 w-full">
